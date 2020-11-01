@@ -12,6 +12,7 @@
     "file-url": "^3.0.0",
     "form-data": "^3.0.0",
     "node-torrent": "^0.2.2",
+    "prompt-sync": "^4.2.0",
     "request": "^2.88.2",
     "rss-parser": "^3.9.0",
     "transmission": "^0.4.10",
