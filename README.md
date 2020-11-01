@@ -1,6 +1,6 @@
 # RawDL💮
 
-RawDL is a node script to schedule and download seasonal anime series.
+RawDL is a node utility to schedule and download seasonal anime series.
 
 ## Installation
 
