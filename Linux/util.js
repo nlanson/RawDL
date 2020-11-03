@@ -1,5 +1,6 @@
 const fs = require('fs');
 const prompt = require('prompt-sync')();
+const floor = Math.floor;
 
 const path = './shows.json';
 const shows = require(path);
@@ -54,8 +55,8 @@ function Add() {
             }
             let new_show = {
                 "name": name,
-                "toUp": toUp,
-                "day": day
+                "toUp": floor(toUp),
+                "day": floor(day)
             };
             
             list.showsArray.push(new_show);

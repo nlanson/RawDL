@@ -22,18 +22,28 @@
     },
     {
       "name": "Kamisama ni Natta Hi",
-      "toUp": 4,
+      "toUp": 5,
       "day": 0
     },
     {
       "name": "Taisou Zamurai",
-      "toUp": 4,
+      "toUp": 5,
       "day": 0
     },
     {
       "name": "Tonikaku Kawaii",
       "toUp": 6,
       "day": 6
+    },
+    {
+      "name": "Majo no Tabitabi",
+      "toUp": 6,
+      "day": 6
+    },
+    {
+      "name": "Munou na Nana",
+      "toUp": 6,
+      "day": 1
     }
   ]
 }
