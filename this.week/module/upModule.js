@@ -25,8 +25,53 @@ class toUploadSingle {
     }
 
     download() {
-        return this.link;
+        let videoName = this.name + "---" + this.episode + ".mkv";
+        videoName = videoName.replace(/\s/g, '-');
+        let options = {
+            path: __dirname + "\\dl\\"
+        }
+        this.videoPath = options.path + videoName;
+
+        return new Promise((resolve, reject) => {
+            var client = new WebTorrent();
+            client.add(this.link, options, function (torrent) {
+                console.log("Downloading: " + torrent.name);
+
+                torrent.on('done', function() {
+                    fs.rename( options.path + torrent.name, options.path + videoName, (err) => {
+                        if(err != null) {
+                            console.log("FS Rename Error: " + err);
+                        }
+                    });
+                    torrent.destroy();
+                    client.destroy( () => {
+                        resolve('resolved');
+                    });
+                });
+                torrent.on('error', function(err) {
+                    console.log("Torrent error: " + err);
+                    reject('rejected');
+                });
+            });
+            client.on('error', function(err){
+                console.log("Client error: " + err);
+                reject('rejected');
+            });
+        })
     }
+
+    buildCommand(url) {
+        var command = "curl -F data=@" + this.videoPath + " " + url;
+        this.command = command;
+        console.log(this.command);
+        return command;
+    }
+
+    async upload() {
+        await exec(this.command);
+    }
+
+
 
 }
 

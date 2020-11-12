@@ -1,6 +1,10 @@
 const uploadModule = require('./module/upModule');
+const util = require('util');
+const exec = util.promisify(require('child_process').exec);
 
 main();
+
+
 
 async function main() {
     var uploadDetails = uploadModule.tuSingle.init();
@@ -19,20 +23,29 @@ async function main() {
     rss = new uploadModule.rss("https://subsplease.org/rss/?t&r=1080");
     feed = await rss.getFeed();
     let link;
-    feed.items.forEach(item => {
+    let result;
+    const promises = [];
+    feed.items.forEach(async (item) => {
         item.title = rss.trim1080(item.title);
         if(item.title == uploadDetails.name) {
             link = item.link
+            uploadDetails.addLink(link);
+            promises.push(uploadDetails.download());
         }
     });
-    
-    if(!rss.linkIsNull(link)) {
-        uploadDetails.addLink(link);
-        let result = await uploadDetails.download();
-        console.log(result);
-    } else {
-        console.log("No match found. Exiting");
-        process.exit(0);
+    //[SubsPlease] Tonikaku Kawaii - 06 (1080p) [3E765447].mkv
+    let command
+    if ( promises.length != 0 ) {
+        await Promise.all(promises)
+        .then(async () => {
+            command = uploadDetails.buildCommand(uploadURL);
+            await uploadDetails.upload();
+        })
+        .catch(error => {
+            console.log(error);
+            process.exit(1);
+        });
     }
+
 
 }
