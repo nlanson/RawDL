@@ -1,6 +1,8 @@
 const https = require('https');
 const fs = require('fs');
 const WebTorrent = require('webtorrent');
+const Parser = require('rss-parser');
+const parser = new Parser();
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const prompt = require('prompt-sync')();
@@ -16,6 +18,14 @@ class toUploadSingle {
         let upEp = prompt("Which episode? ");
         let returnClass = new toUploadSingle(showname, upEp);
         return returnClass;
+    }
+
+    addLink(link) {
+        this.link = link;
+    }
+
+    download() {
+        return this.link;
     }
 
 }
@@ -51,9 +61,47 @@ class api {
 
                 }).on("error", (err) => {
                     console.log("Error: " + err.message);
-                    rej('error: check log');
+                    rej('st rejected');
                 });
         });
+    }
+}
+
+class rss {
+    constructor(link) {
+        this.link = link
+    }
+
+    async getFeed() {
+        return new Promise((res, rej) => {
+            let feed = parser.parseURL(this.link);
+            if(1==1){
+                res(feed);
+            } else {
+                rej("rss rejected");
+            }
+            
+        });
+    }
+
+    trim1080(title) {
+        let strlen = title.length - 28;
+        let rtitle = title.slice(13, strlen);
+        return rtitle;
+    }
+
+    trim720(title) {
+        let strlen = title.length - 22;
+        let rtitle = title.slice(13, strlen);
+        return rtitle;
+    }
+
+    linkIsNull(link) {
+        if(link == null) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 
@@ -64,3 +112,4 @@ class api {
 
 module.exports.tuSingle = toUploadSingle
 module.exports.api = api;
+module.exports.rss = rss;

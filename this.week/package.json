@@ -7,5 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "rss-parser": "^3.9.0",
+    "webtorrent": "^0.110.1"
+  }
 }

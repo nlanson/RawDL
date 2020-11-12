@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "prompt-sync": "^4.2.0",
+    "rss-parser": "^3.9.0",
     "webtorrent": "^0.110.1"
   }
 }
