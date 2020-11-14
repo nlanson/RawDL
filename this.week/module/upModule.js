@@ -110,8 +110,12 @@ class toUploadSingle {
     }
     
     delete() {
-        fs.unlink(this.videoPath);
-        fs.unlink(this.postPath);
+        fs.unlink(this.videoPath, () => {
+            console.log("mkv deleted");
+        });
+        fs.unlink(this.postPath, () => {
+            console.log("mp4 deleted")
+        });
     }
 
 
