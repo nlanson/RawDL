@@ -34,12 +34,13 @@ async function main() {
         }
     });
     //[SubsPlease] Tonikaku Kawaii - 06 (1080p) [3E765447].mkv
-    let command
+    let uploadResult;
     if ( promises.length != 0 ) {
         await Promise.all(promises)
         .then(async () => {
-            command = uploadDetails.buildCommand(uploadURL);
-            await uploadDetails.upload();
+            uploadDetails.buildCommand(uploadURL);
+            uploadResult = await uploadDetails.upload();
+            console.log(uploadResult);
         })
         .catch(error => {
             console.log(error);

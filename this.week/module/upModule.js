@@ -68,7 +68,23 @@ class toUploadSingle {
     }
 
     async upload() {
-        await exec(this.command);
+        return new Promise((resolve, reject) => {
+            let failed = false;
+            let error
+            try {
+                console.log("Uploading " + this.videoName + "...");
+                await exec(this.command);
+            } catch(err) {
+                error = err;
+                failed = true;
+            }
+            if ( failed == true ) {
+                reject('Upload failed:\n', err);
+            }
+            if ( failed == false ) {
+                resolve('upload complete!');
+            }
+        })
     }
 
 
