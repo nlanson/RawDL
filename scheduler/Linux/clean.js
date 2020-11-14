@@ -94,10 +94,10 @@ function asyncTorrentDownload(title, link, pathTitle) {
                 var newPath = options.path + title;
                 //newPath = __dirname + "/dl/" + title; //remove this line for pi
                 fs.rename(oldPath, newPath, () => { console.log("File Renamed!") });
-                encodedPath = await encode();
+                //encodedPath = await encode();
                 torrent.destroy();
                 client.destroy( () => {
-                    getUploadLink(encodedPath, () => {
+                    getUploadLink(newPath, () => {
                         fs.unlink(newPath, () => { console.log(torrent.name + " has been uploaded and deleted.") });
                         resolve('Resolved');
                     });
