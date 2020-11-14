@@ -29,7 +29,7 @@ class toUploadSingle {
         let videoName = this.name + "---" + this.episode + ".mkv";
         videoName = videoName.replace(/\s/g, '-');
         let options = {
-            path: __dirname + "\\dl\\"
+            path: "/media/nlanson/ndrive/upload/"
         }
         this.videoPath = options.path + videoName;
 
@@ -90,7 +90,7 @@ class toUploadSingle {
 
     async encode() {
         let prePath = this.videoPath;
-        this.postPath = this.videoPath.slice(0, this.videoPath.length - 3) + ".mp4";
+        this.postPath = this.videoPath.slice(0, this.videoPath.length - 4) + ".mp4";
         return new Promise((resolve, reject) => {
             hbjs.spawn({ input: this.videoPath, output: this.postPath })
             .on('error', err => {
@@ -108,7 +108,7 @@ class toUploadSingle {
             });
         })
     }
-
+    
     delete() {
         fs.unlink(this.videoPath);
         fs.unlink(this.postPath);
