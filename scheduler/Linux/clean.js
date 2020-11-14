@@ -88,7 +88,7 @@ function asyncTorrentDownload(title, link, pathTitle) {
         client.add(link, options, function (torrent) {
             console.log('Client is downloading:', torrent.name);
 
-            torrent.on('done', function () {
+            torrent.on('done', async function () {
                 console.log("Download finished for: ", torrent.name);
                 var oldPath = options.path + pathTitle;
                 var newPath = options.path + title;
