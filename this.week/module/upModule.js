@@ -62,14 +62,14 @@ class toUploadSingle {
     }
 
     buildCommand(url) {
-        var command = "curl -F data=@" + this.videoPath + " " + url;
+        var command = "curl -F data=@" + this.postPath + " " + url;
         this.command = command;
         console.log(this.command);
         return command;
     }
 
     async upload() {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             let failed = false;
             let error
             try {
@@ -90,9 +90,9 @@ class toUploadSingle {
 
     async encode() {
         let prePath = this.videoPath;
-        let postPath = this.videoPath.slice(0, this.videoPath.length - 3) + ".mp4";
+        this.postPath = this.videoPath.slice(0, this.videoPath.length - 3) + ".mp4";
         return new Promise((resolve, reject) => {
-            hbjs.spawn({ input: this.videoPath, output: postPath })
+            hbjs.spawn({ input: this.videoPath, output: this.postPath })
             .on('error', err => {
                 console.log(err);
                 reject(false);
@@ -104,10 +104,14 @@ class toUploadSingle {
                 console.log("Encoding finished.");
             })
             .on('complete', () => {
-                this.videoPath = postPath;
                 resolve(true);
             });
         })
+    }
+
+    delete() {
+        fs.unlink(this.videoPath);
+        fs.unlink(this.postPath);
     }
 
 

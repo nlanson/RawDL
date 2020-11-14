@@ -6,7 +6,8 @@ const fs = require('fs');
 const WebTorrent = require('webtorrent');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
-const path = require('path');
+const hbjs = require('handbrake-js');
+const { encode } = require('punycode');
 
 //Reading shows.json
 const jsonPath = __dirname +  '/shows.json';
@@ -93,9 +94,10 @@ function asyncTorrentDownload(title, link, pathTitle) {
                 var newPath = options.path + title;
                 //newPath = __dirname + "/dl/" + title; //remove this line for pi
                 fs.rename(oldPath, newPath, () => { console.log("File Renamed!") });
+                encodedPath = await encode();
                 torrent.destroy();
                 client.destroy( () => {
-                    getUploadLink(newPath, () => {
+                    getUploadLink(encodedPath, () => {
                         fs.unlink(newPath, () => { console.log(torrent.name + " has been uploaded and deleted.") });
                         resolve('Resolved');
                     });
@@ -149,3 +151,23 @@ async function curl(command, _callback) {
     };
     _callback();
 };
+
+async function encode(mkvPath) {
+    let mp4Path = mkvPath.slice(0, mkvPath - 4) + ".mp4";
+    return new Promise((resolve, reject) => {
+        hbjs.spawn({ input: mkvPath, output: mp4Path })
+        .on('error', err => {
+            console.log(err);
+            reject(false);
+        })
+        .on('begin', progress => {
+            console.log("Start encoding.");
+        })
+        .on('end', () => {
+            console.log("Encoding finished.");
+        })
+        .on('complete', () => {
+            resolve(mp4Path);
+        });
+    })
+}
