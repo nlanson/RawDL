@@ -6,6 +6,7 @@ const parser = new Parser();
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const prompt = require('prompt-sync')();
+const hbjs = require('handbrake-js');
 
 class toUploadSingle {
     constructor(name, episode) {
@@ -84,6 +85,28 @@ class toUploadSingle {
             if ( failed == false ) {
                 resolve('upload complete!');
             }
+        })
+    }
+
+    async encode() {
+        let prePath = this.videoPath;
+        let postPath = this.videoPath.slice(0, this.videoPath.length - 3) + ".mp4";
+        return new Promise((resolve, reject) => {
+            hbjs.spawn({ input: this.videoPath, output: postPath })
+            .on('error', err => {
+                console.log(err);
+                reject(false);
+            })
+            .on('begin', progress => {
+                console.log("Start encoding.");
+            })
+            .on('end', () => {
+                console.log("Encoding finished.");
+            })
+            .on('complete', () => {
+                this.videoPath = postPath;
+                resolve(true);
+            });
         })
     }
 
