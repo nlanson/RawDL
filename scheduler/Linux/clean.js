@@ -152,7 +152,7 @@ async function curl(command, _callback) {
     _callback();
 };
 
-async function encode(mkvPath) {
+async function encodeVideo(mkvPath) {
     let mp4Path = mkvPath.slice(0, mkvPath - 4) + ".mp4";
     return new Promise((resolve, reject) => {
         hbjs.spawn({ input: mkvPath, output: mp4Path })
