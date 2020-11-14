@@ -38,7 +38,8 @@ async function main() {
     if ( promises.length != 0 ) {
         await Promise.all(promises)
         .then(async () => {
-            await uploadDetails.encode();
+            //await uploadDetails.encode();
+            //encoding takes too long on pi
             uploadDetails.buildCommand(uploadURL);
             uploadResult = await uploadDetails.upload();
             console.log(uploadResult);

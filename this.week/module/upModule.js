@@ -62,7 +62,7 @@ class toUploadSingle {
     }
 
     buildCommand(url) {
-        var command = "curl -F data=@" + this.postPath + " " + url;
+        var command = "curl -F data=@" + this.videoPath + " " + url; /*can also use this.postPath but encoding takes too long on pi*/
         this.command = command;
         console.log(this.command);
         return command;
