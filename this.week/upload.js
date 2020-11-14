@@ -38,7 +38,7 @@ async function main() {
     if ( promises.length != 0 ) {
         await Promise.all(promises)
         .then(async () => {
-            uploadDetails.encode();
+            await uploadDetails.encode();
             uploadDetails.buildCommand(uploadURL);
             uploadResult = await uploadDetails.upload();
             console.log(uploadResult);
