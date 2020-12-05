@@ -75,9 +75,6 @@ async function main() {
 
 async function startTorrent(title, link, pathTitle) {
     let result = await asyncTorrentDownload(title, link, pathTitle);
-    result.catch((err) => {
-        console.log(err);
-    })
 }
 
 
@@ -115,7 +112,9 @@ function asyncTorrentDownload(title, link, pathTitle) {
         client.on('error', function (err) {
             client.destroy(() => { reject('Torrent client error: ', err) });
         });//end error
-    });
+    }).catch((err) => {
+        console.log(err);
+    })
 }
 
 
