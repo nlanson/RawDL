@@ -75,6 +75,9 @@ async function main() {
 
 async function startTorrent(title, link, pathTitle) {
     let result = await asyncTorrentDownload(title, link, pathTitle);
+    result.catch((err) => {
+        console.log(err);
+    })
 }
 
 
