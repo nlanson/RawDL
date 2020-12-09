@@ -2,47 +2,52 @@
   "showsArray": [
     {
       "name": "Higurashi no Naku Koro ni Gou",
-      "toUp": 8,
+      "toUp": 11,
       "day": 5
     },
     {
       "name": "Akudama Drive",
-      "toUp": 7,
+      "toUp": 10,
       "day": 5
     },
     {
       "name": "Haikyuu!! To The Top",
-      "toUp": 21,
+      "toUp": 24,
       "day": 6
     },
     {
       "name": "Jujutsu Kaisen",
-      "toUp": 8,
+      "toUp": 11,
       "day": 6
     },
     {
       "name": "Kamisama ni Natta Hi",
-      "toUp": 6,
+      "toUp": 10,
       "day": 0
     },
     {
       "name": "Taisou Zamurai",
-      "toUp": 6,
+      "toUp": 10,
       "day": 0
     },
     {
       "name": "Tonikaku Kawaii",
-      "toUp": 8,
+      "toUp": 11,
       "day": 6
     },
     {
       "name": "Majo no Tabitabi",
-      "toUp": 8,
+      "toUp": 11,
       "day": 6
     },
     {
       "name": "Munou na Nana",
-      "toUp": 7,
+      "toUp": 11,
+      "day": 1
+    },
+    {
+      "name": "Shingeki no Kyojin (The Final Season)",
+      "toUp": 61,
       "day": 1
     }
   ]

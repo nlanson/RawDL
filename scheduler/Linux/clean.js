@@ -50,6 +50,8 @@ async function main() {
                 link = item.link;
                 title = item.title;
                 title = title.replace(/\s/g, '-');
+                title = title.replace('(', '');
+                title = title.replace(')', '');
                 console.log("Found match: " + pathTitle);
                 list.showsArray[i].toUp = list.showsArray[i].toUp + 1;
                 fs.writeFile(jsonPath, JSON.stringify(list, null, 2), function writeJSON(err) {
@@ -98,7 +100,7 @@ function asyncTorrentDownload(title, link, pathTitle) {
                 torrent.destroy();
                 client.destroy( () => {
                     getUploadLink(newPath, () => {
-                        fs.unlink(newPath, () => { console.log(torrent.name + " has been uploaded and deleted.") });
+                        //fs.unlink(newPath, () => { console.log(torrent.name + " has been uploaded and deleted.") });
                         resolve('Resolved');
                     });
                 }); //end client destroy
@@ -144,12 +146,12 @@ function uploadVid(uploadUrl, vidPath, _callback) {
 }
 
 
-async function curl(command, _callback) {
+async function curl(command, _callback) {   
     try {
         console.log("Uploading...")
         await exec(command);
     } catch(err) { 
-        reject('cURL failed: ', err);
+        console.log('cURL failed: ', err);
     };
     _callback();
 };
