@@ -2,53 +2,23 @@
   "showsArray": [
     {
       "name": "Higurashi no Naku Koro ni Gou",
-      "toUp": 11,
+      "toUp": 13,
       "day": 5
-    },
-    {
-      "name": "Akudama Drive",
-      "toUp": 10,
-      "day": 5
-    },
-    {
-      "name": "Haikyuu!! To The Top",
-      "toUp": 24,
-      "day": 6
     },
     {
       "name": "Jujutsu Kaisen",
-      "toUp": 11,
+      "toUp": 14,
       "day": 6
-    },
-    {
-      "name": "Kamisama ni Natta Hi",
-      "toUp": 10,
-      "day": 0
-    },
-    {
-      "name": "Taisou Zamurai",
-      "toUp": 10,
-      "day": 0
-    },
-    {
-      "name": "Tonikaku Kawaii",
-      "toUp": 11,
-      "day": 6
-    },
-    {
-      "name": "Majo no Tabitabi",
-      "toUp": 11,
-      "day": 6
-    },
-    {
-      "name": "Munou na Nana",
-      "toUp": 11,
-      "day": 1
     },
     {
       "name": "Shingeki no Kyojin (The Final Season)",
-      "toUp": 61,
+      "toUp": 64,
       "day": 1
+    },
+    {
+      "name": "Osomatsu-san S3",
+      "toUp": 12,
+      "day": 2
     }
   ]
 }
