@@ -1,4 +1,9 @@
 import { rawdl } from 'rawdl';
 
-let a = new rawdl.showsList(__dirname + '/shows.json'); //Input Param will require path to JSON relative to this file.
-a.testFunction();
+async function main() {
+    var checker = new rawdl.Checker(__dirname+'/shows.json', 'https://subsplease.org/rss/?t&r=1080');
+    await checker.parseRSS();
+    checker.checkForShowsByDay();
+}
+
+main();
