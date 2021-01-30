@@ -37,18 +37,19 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var rawdl_1 = require("rawdl");
+//@ts-ignore Ignore is used here to ignore the IDE from complaining about __dirname not being a known variable when infact it is.
+var dirname = __dirname;
+var api_keys = {
+    username: '09c8392061b548eebd4e',
+    password: 'Z1doL1Qjm6Fq9Yd',
+    folder: 'DjOleF2OpRk'
+};
 function auto() {
     return __awaiter(this, void 0, void 0, function () {
-        var dirname, api_keys, ap;
+        var ap;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    dirname = __dirname;
-                    api_keys = {
-                        username: '09c8392061b548eebd4e',
-                        password: 'Z1doL1Qjm6Fq9Yd',
-                        folder: 'DjOleF2OpRk'
-                    };
                     ap = new rawdl_1.rawdl.AutoPilot(dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080', api_keys, dirname + '/downloads');
                     return [4 /*yield*/, ap.engage()];
                 case 1:
@@ -60,16 +61,10 @@ function auto() {
 }
 function semiAuto() {
     return __awaiter(this, void 0, void 0, function () {
-        var dirname, api_keys, scanner, dlData, torrent, upData, upload;
+        var scanner, dlData, torrent, upData, upload;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    dirname = __dirname;
-                    api_keys = {
-                        username: '09c8392061b548eebd4e',
-                        password: 'Z1doL1Qjm6Fq9Yd',
-                        folder: 'DjOleF2OpRk'
-                    };
                     scanner = new rawdl_1.rawdl.Scan(dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080');
                     return [4 /*yield*/, scanner.auto()];
                 case 1:
@@ -88,3 +83,9 @@ function semiAuto() {
     });
 }
 auto();
+/*
+Upcoming Features:
+  -> Single download: Download a single episode(From the past week.)
+  -> Utility: To help create shows.json, dlData and upData objects.
+
+*/
