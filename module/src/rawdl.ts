@@ -10,11 +10,22 @@ const exec = util.promisify(require('child_process').exec);
 
 export namespace rawdl {
     
+    interface ShowData {
+        name: string,
+        nextEp: number,
+        day: number
+    }
+
+    interface DownloadData {
+        title: string,
+        link: string,
+        path: string
+    }
     
     export class Checker{
         private json_path: string;
-        private rssFeed: any; //RSS Object
-        private list: any;
+        public rssFeed: any; //RSS Object
+        public list: any;
         
         constructor(json_path: string, rssFeed: string) {
             this.json_path = json_path;
@@ -24,13 +35,56 @@ export namespace rawdl {
             this.rssFeed = rssFeed;
         }
 
-        async parseRSS() {
+        public async parseRSS() {
             this.rssFeed = await parser.parseURL(this.rssFeed);
         }
-
-        async checkForShowsByDay() {
-            //Loop over feed and list to extract download link for available shows.
+        
+        public getCheckWorthyShowsByDay(): ShowData[] {
+            var today = new Date();
+            var day = today.getDay();
+            var shows: ShowData[] = [];
+            this.list.list.forEach((show:any) => {
+                if ( show.day == day ) {
+                    shows.push(show) // Todo: Push the current ep + the next two eps just in case.
+                }
+            });
+            return(shows);
         }
+
+        public getAvailShows(checkList: ShowData[]): DownloadData[] {
+            var downloadData: DownloadData[] = [];
+
+            this.rssFeed.items.forEach((item: any) => {
+                //Prune item.title and get rid of prefix and suffix.
+                
+                let found = false;
+                let i = 0;
+
+                while ( i < checkList.length && found != true ) {  
+                    let nextEp:number|string = checkList[i].nextEp;
+                    nextEp = (nextEp < 10)? "0"+nextEp.toString():nextEp;
+                    let lookingFor = checkList[i].name + " - " + nextEp;
+                    
+                    if ( lookingFor == item.title ) {
+                        found = true; 
+                        let path = item.title.replace(/\s/g, '-'); //Remove illegal chars from title.
+                        path = path.replace('(', '');
+                        path = path.replace(')', '');
+                        let dlData = {
+                            title: item.title,
+                            link: item.link,
+                            path: path
+                        }
+                        downloadData.push(dlData);
+                    }
+
+                    i++;
+                }
+            });
+
+            return downloadData;
+        }
+
 
         //Create a torrent manager to download each torrent asynchronously to prevent memory leaks.
     }

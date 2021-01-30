@@ -39,7 +39,7 @@ exports.__esModule = true;
 var rawdl_1 = require("rawdl");
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var checker;
+        var checker, showsToCheck, dlData;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -47,7 +47,10 @@ function main() {
                     return [4 /*yield*/, checker.parseRSS()];
                 case 1:
                     _a.sent();
-                    checker.checkForShowsByDay();
+                    showsToCheck = checker.getCheckWorthyShowsByDay();
+                    console.log(showsToCheck);
+                    dlData = checker.getAvailShows(showsToCheck);
+                    console.log(dlData);
                     return [2 /*return*/];
             }
         });
