@@ -1,0 +1,21 @@
+{
+  "name": "rawdl",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "types": "dist/index.d.ts",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "NozzaVevo",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^14.14.22",
+    "@types/webtorrent": "^0.109.0",
+    "rss-parser": "^3.10.0",
+    "webtorrent": "^0.112.3"
+  }
+}

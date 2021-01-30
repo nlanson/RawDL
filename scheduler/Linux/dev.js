@@ -6,7 +6,8 @@ const fs = require('fs');
 const WebTorrent = require('webtorrent');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
-const path = require('path');
+//const hbjs = require('handbrake-js');
+//const { encode } = require('punycode');
 
 //Reading shows.json
 const jsonPath = __dirname +  '/shows.json';
@@ -17,27 +18,33 @@ let list = JSON.parse(rawdata); //use list to refer to shows.json contents
 //initializing variables
 let link = new String;
 let title = new String;
+let showsArray = [];
 const promises = [];
+
+//For ease of use
+console.log(`RawDL DEV`); 
+
 
 main();
 
 async function main() {
-    let rssLink = "https://subsplease.org/rss/?t&r=720"; //nyaa URL (720p)
+    //let rssLink = "https://subsplease.org/rss/?t&r=720"; //nyaa URL (720p)
     let rssLink1080 = "https://subsplease.org/rss/?t&r=1080" //nyaa URL (1080p)
     //let rssMagLink = "https://subsplease.org/rss/?r=720"; //magnet URL
-    let feed = await parser.parseURL(rssLink);
-    console.log(feed.title);
-    var today = new Date();
-    var day = today.getDay();
-
+    let feed = await parser.parseURL(rssLink1080);
+    //console.log(feed.title); <- Prints 'SubsPlease RSS'
+    let today = new Date();
+    let day = today.getDay(); //to match day of week to which shows to scan for.
+    console.log(`Scanning for new episodes released on ${today.getDate()}/${today.getMonth()+1}`);
+    
     feed.items.forEach(item => {
-        var str_len = item.title.length -22; //-22 for 720p  
-        var pathTitle = item.title;
+        let str_len = item.title.length -23; //-22 for 720p  
+        let pathTitle = item.title;
         item.title = item.title.slice(13, str_len);
         let i = 0;
         let found = false;
         while( i < list.showsArray.length && found != true ) {
-            var toUp = list.showsArray[i].toUp.toString();
+            let toUp = list.showsArray[i].toUp.toString();
             if( toUp < 10 ) {
                 toUp = "0" + toUp.toString();
             }
@@ -49,20 +56,24 @@ async function main() {
                 link = item.link;
                 title = item.title;
                 title = title.replace(/\s/g, '-');
+                title = title.replace('(', '');
+                title = title.replace(')', '');
                 console.log("Found match: " + pathTitle);
                 list.showsArray[i].toUp = list.showsArray[i].toUp + 1;
                 fs.writeFile(jsonPath, JSON.stringify(list, null, 2), function writeJSON(err) {
                     if (err) return console.log(err);
                 });
                 
-                promises.push(startTorrent(title, link, pathTitle));
+                showsArray.push({title: title, link: link, pathTitle: pathTitle});
+                //promises.push(startTorrent(title, link, pathTitle));
             }
             i++;
         }
     });
+    await torrentManager(showsArray);
     await Promise.all(promises)
     .then(response => {
-        console.log(response + "All promises have been fulfilled. Terminating.");
+        console.log(response + "Ending Program");
         process.exit(0);
     })
     .catch(error => {
@@ -71,46 +82,42 @@ async function main() {
     });
 }
 
-/*
-For some unknown reason, the code does not work without the function below.
-I have tried implementing in 
 
-promises.push(() => {
-    let result = await asyncTorrentDownload(params);
-});
+async function torrentManager(showsArray) {
+    console.log(showsArray);
+    for(i=0; i<= showsArray.length; i++) {
+        console.log(i);
+        console.log(showsArray[i].title)
+        //await asyncTorrentDownload(showsArray[i].title, showsArray[i].link, showsArray[i].pathTitle);
+    }
+}
 
-But that didnt work due to syntax error: 
-let result = await asyncTorrentDownload(title, link, pathTitle);
-SyntaxError: await is only valid in async function
-
-So please bare with this visually unneccasary function.
-*/
-
-async function startTorrent(title, link, pathTitle) {
+async function startTorrent(title, link, pathTitle) { //Promises array is awaitin this function to complete.
     let result = await asyncTorrentDownload(title, link, pathTitle);
 }
 
 
 function asyncTorrentDownload(title, link, pathTitle) {
     return new Promise((resolve, reject) => {
-        var client = new WebTorrent()
-        var options = {
+        let client = new WebTorrent()
+        let options = {
             path: "/media/nlanson/ndrive/upload/" //__dirname + "/dl/" // Folder to download files to (default=`/tmp/webtorrent/`) Change to /media/nlanson/ndrive for pi
         };
 
         client.add(link, options, function (torrent) {
-            console.log('Client is downloading:', torrent.name);
+            console.log('Downloading:', torrent.name);
 
-            torrent.on('done', function () {
+            torrent.on('done', async function () {
                 console.log("Download finished for: ", torrent.name);
-                var oldPath = options.path + pathTitle;
-                var newPath = options.path + title;
+                let oldPath = options.path + pathTitle;
+                let newPath = options.path + title;
                 //newPath = __dirname + "/dl/" + title; //remove this line for pi
                 fs.rename(oldPath, newPath, () => { console.log("File Renamed!") });
+                //encodedPath = await encode();
                 torrent.destroy();
                 client.destroy( () => {
                     getUploadLink(newPath, () => {
-                        fs.unlink(newPath, () => { console.log(torrent.name + " has been uploaded and deleted.") });
+                        //fs.unlink(newPath, () => { console.log(torrent.name + " has been uploaded and deleted.") });
                         resolve('Resolved');
                     });
                 }); //end client destroy
@@ -124,12 +131,14 @@ function asyncTorrentDownload(title, link, pathTitle) {
         client.on('error', function (err) {
             client.destroy(() => { reject('Torrent client error: ', err) });
         });//end error
-    });
+    }).catch((err) => {
+        console.log(err);
+    })
 }
 
 
 async function getUploadLink(newPath, _callback) {
-    console.log("Grabbing upload link...");
+    //console.log("Grabbing upload link...");
     let data = '';
     
     https.get("https://api.streamtape.com/file/ul?login=09c8392061b548eebd4e&key=Z1doL1Qjm6Fq9Yd&folder=DjOleF2OpRk" , (res) => {
@@ -148,18 +157,37 @@ async function getUploadLink(newPath, _callback) {
 
 
 function uploadVid(uploadUrl, vidPath, _callback) {
-    console.log(vidPath);
-    var command = "curl -F data=@" + vidPath + " " + uploadUrl;
-    console.log("Command generated...");
+    console.log(`Initiating upload for ${vidPath}`);
+    let command = "curl -F data=@" + vidPath + " " + uploadUrl;
     curl(command, _callback);
 }
 
 
-async function curl(command, _callback) {
+async function curl(command, _callback) {   
     try {
         await exec(command);
     } catch(err) { 
-        reject('cURL failed: ', err);
+        console.log('Upload Failed at rawdl(line 158) ', err);
     };
     _callback();
 };
+
+async function encodeVideo(mkvPath) {   //Unused encoding function. Can encode .mkv file to .mp4 to reduce file size from 1GB~ to around 150MB.
+    let mp4Path = mkvPath.slice(0, mkvPath - 4) + ".mp4";   //Too resourceful on Pi.
+    return new Promise((resolve, reject) => {
+        hbjs.spawn({ input: mkvPath, output: mp4Path })
+        .on('error', err => {
+            console.log(err);
+            reject(false);
+        })
+        .on('begin', progress => {
+            console.log("Start encoding.");
+        })
+        .on('end', () => {
+            console.log("Encoding finished.");
+        })
+        .on('complete', () => {
+            resolve(mp4Path);
+        });
+    })
+}

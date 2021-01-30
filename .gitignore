@@ -1,2 +1,5 @@
 # User-specific files
-this.week/module/dl/
+module/.vscode/
+module/dist/
+module/node_modules/
+module/examples/node_modules/

@@ -1,4 +1,4 @@
-    //Dependencies
+//Dependencies
 const https = require('https');
 const Parser = require('rss-parser');
 const parser = new Parser();
