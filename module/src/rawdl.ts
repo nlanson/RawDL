@@ -126,19 +126,32 @@ export namespace rawdl {
                         };
 
                         downloadData.push(dlData);
-                    }
+
+                        //Makeshift JSON Counter Increaser. 
+                        //Todo: Remove this crap and create a dedicated function for checking for matches and incrementing.
+                        for(let j=0; j<this.list.list.length; j++) {
+                            if(checkList[i].name == this.list.list[i].name) {
+                                let listInstance = this.list.list;
+                                listInstance[j].nextEp = listInstance[j].nextEp +1;
+                                this.writeJSON(listInstance);
+                            }
+                        }
+                    }               
 
                     i++;
                 }
             });
-
-            //Increment shows.json nextEp count here and writefile either here or at the end.
 
             return downloadData;
         }
 
         private findTitleSliceVal() {
             this.title_slice_val = (this.rssFeed.description.length == 40) ? 23:22; //If RSS Description is 40 Chars long, set the slice value to 23. Else 22.
+        }
+
+        public writeJSON(list: any) {
+            console.log('write function');
+            fs.writeFileSync(this.json_path, JSON.stringify(list, null, 2))
         }
 
 
@@ -175,7 +188,7 @@ export namespace rawdl {
         }
 
         private async createOutFolder() {
-            console.log(this.outFolder);
+            //console.log(this.outFolder);
             if (!fs.existsSync(this.outFolder)) {
                 fs.mkdirSync(this.outFolder);
                 console.log(`Output folder created at ${this.outFolder}`);
