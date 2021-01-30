@@ -4,6 +4,7 @@ import Parser = require('rss-parser');
 import * as https from 'https';
 import * as fs from 'fs';
 import * as util from 'util';
+import { Console } from 'console';
 
 const parser = new Parser();
 const exec = util.promisify(require('child_process').exec);
@@ -19,10 +20,20 @@ export namespace rawdl {
     interface DownloadData {
         title: string,
         link: string,
-        path: string
+        newTitle: string
+    }
+
+    interface UploadData {
+        path: string,
+        newPath: string
+    }
+
+    interface Streamtape_API_Keys {
+        username: string,
+        password: string
     }
     
-    export class Checker{
+    export class Scan { //This class will scan for released episodes under the shows.json filter.
         private json_path: string;
         private title_slice_val: number;
         public rssFeed: any; //RSS Object
@@ -37,11 +48,22 @@ export namespace rawdl {
             this.title_slice_val = 23 //Default set to 23 to deal with 1080p Title Slice
         }
 
-        public async parseRSS() {
-            this.rssFeed = await parser.parseURL(this.rssFeed);
+        public async auto(): Promise<Array<DownloadData>> {
+            await this.parseRSS();
+            let showsToCheck = this.getCheckWorthyShowsByDay();
+            let dlData = this.getAvailShows(showsToCheck);
+            return dlData;
         }
         
-        public getCheckWorthyShowsByDay(): ShowData[] {
+        public async parseRSS(): Promise<void> {
+            this.rssFeed = await parser.parseURL(this.rssFeed).catch((err) => {
+                throw new Error(`RSS Parse Error: \n ${err}`);
+            })
+        }
+        
+        public getCheckWorthyShowsByDay(): ShowData[] { //This function creates a list of shows that are potentially available for download.    
+            if ( this.list.list.length == 0 ) throw new Error('List length is Zero.');
+            
             var today = new Date();
             var day = today.getDay();
             var shows: ShowData[] = [];
@@ -53,12 +75,12 @@ export namespace rawdl {
             return(shows);
         }
 
-        public getAvailShows(checkList: ShowData[]): DownloadData[] {
+        public getAvailShows(checkList: ShowData[]): DownloadData[] { //This function filters out unreleased shows from the Checklist and returns a list of shows that are available for download.
             this.findTitleSliceVal();
             var downloadData: DownloadData[] = [];
 
             this.rssFeed.items.forEach((item: any) => {
-                item.title = item.title.slice(13, item.title.length - this.title_slice_val); //Slice item.title to remove SubsPlease Prefix and Suffix.
+                let modifiedTitle = item.title.slice(13, item.title.length - this.title_slice_val); //Slice item.title to remove SubsPlease Prefix and Suffix.
                 
                 let found = false;
                 let i = 0;
@@ -68,16 +90,16 @@ export namespace rawdl {
                     nextEp = (nextEp < 10)? "0"+nextEp.toString():nextEp;
                     let lookingFor = checkList[i].name + " - " + nextEp;
                     
-                    if ( lookingFor == item.title ) {
+                    if ( lookingFor == modifiedTitle ) {
                         found = true; 
-                        let path = item.title.replace(/\s/g, '-'); //Remove illegal chars from title.
-                        path = path.replace('(', '');
-                        path = path.replace(')', '');
+                        let newTitle = modifiedTitle.replace(/\s/g, '-'); //Remove illegal chars from title.
+                        newTitle = newTitle.replace('(', '');
+                        newTitle = newTitle.replace(')', '');
                         let dlData = {
-                            title: item.title,
-                            link: item.link,
-                            path: path
-                        }
+                            title: item.title, //To access the video without its name changed
+                            link: item.link, //To download the torrent
+                            newTitle: newTitle //The path that the video shall become.
+                        };
                         downloadData.push(dlData);
                     }
 
@@ -94,6 +116,112 @@ export namespace rawdl {
 
 
         //Create a torrent manager to download each torrent asynchronously to prevent memory leaks.
+    }
+
+
+
+    export class Torrent {
+        private dlDataList: Array<DownloadData>;
+        private outFolder: string;
+
+        constructor(dlDataList: Array<DownloadData>, outFolder?: string) {
+            this.dlDataList = dlDataList;
+            this.outFolder = (outFolder) ? outFolder:__dirname+'/downloads';
+            //this.createOutFolder();
+        }
+
+        public async auto(): Promise<Array<UploadData>> { //Auto torrent manager. Asyncronous download + upload.
+            this.createOutFolder();
+            console.log('Torrent AutoPilot Engaged');
+
+            let uploadData: Array<UploadData> = [];
+            for ( let i = 0; i < this.dlDataList.length; i++ ) {
+                let path = await this.download(this.dlDataList[i]); //Returns the path of the downloaded video.
+                let upData = {
+                    path: path,
+                    newPath: this.outFolder + '/' + this.dlDataList[i].newTitle
+                }
+                uploadData.push(upData);
+            }
+
+            return uploadData;
+        }
+
+        private async createOutFolder() {
+            console.log(this.outFolder);
+            if (!fs.existsSync(this.outFolder)) {
+                fs.mkdirSync(this.outFolder);
+                console.log(`Output folder created at ${this.outFolder}`);
+            }
+        }
+
+        public changeOutFolder(newDir: string) {
+            this.outFolder = newDir;
+            this.createOutFolder();
+        }
+
+        public async download(dlData: DownloadData):Promise<string> { //Takes in DL Data for a single episode and downloads and returns the directory of the downloaded torrent.
+            var client = new WebTorrent();
+            var options = {
+                path: this.outFolder
+            }
+            
+            return new Promise((resolve, reject) => {
+                console.log('    Webtorrent has recieved a new torrent.')
+                client.add(dlData.link, options, (torrent) => {
+                    torrent.on('done', () => {
+                        console.log('        Download Finished')
+                        torrent.destroy();
+                        client.destroy();
+                        let torrentDir = this.outFolder + '/' + torrent.name;
+                        resolve(torrentDir);
+                    });
+                    torrent.on('error', (err) => {
+                        throw new Error(`Torrent Client Error: ${err}`);
+                    })
+                })
+            })
+        }
+
+    }
+
+
+
+    export class Upload {
+        private api_keys: Streamtape_API_Keys;
+        private uploadDataList: Array<UploadData>;
+
+        constructor( uploadDataList: Array<UploadData>, api_keys: Streamtape_API_Keys ) {
+            this.api_keys = api_keys;
+            this.uploadDataList = uploadDataList;
+        }
+
+        public async auto() {
+            console.log('Upload Autopilot Engaged');
+            for ( let i=0; i<this.uploadDataList.length; i++ ) {
+                let path = await this.rename(this.uploadDataList[i]);
+                let link = await this.getUploadLink();
+                this.upload(path, link);
+            }
+        }
+        
+        public rename(upData: UploadData): string {
+            fs.rename(upData.path, upData.newPath, () => {});
+            return upData.newPath;
+        }
+        
+        public async  getUploadLink() {
+            //This function should return the retrieved upload link from Streamtape.
+
+            //Using dummy response to test.
+            return 'https://upload.link/lol';
+        }
+
+        public upload(path: string, link: string) {
+            let command = "curl -F data=@" + path + " " + link;
+            console.log(command);
+        }
+
     }
 
     //Todo create a new upload Class with input of streamtape API keys and use this class to upload each downloaded torrent.

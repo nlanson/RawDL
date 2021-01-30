@@ -39,17 +39,26 @@ exports.__esModule = true;
 var rawdl_1 = require("rawdl");
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var checker, showsToCheck, dlData;
+        var dirname, scanner, dlData, torrent, upData, upload;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    checker = new rawdl_1.rawdl.Checker(__dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080');
-                    return [4 /*yield*/, checker.parseRSS()];
+                    dirname = __dirname;
+                    scanner = new rawdl_1.rawdl.Scan(dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080');
+                    return [4 /*yield*/, scanner.auto()];
                 case 1:
+                    dlData = _a.sent();
+                    torrent = new rawdl_1.rawdl.Torrent(dlData, dirname + '/downloads');
+                    return [4 /*yield*/, torrent.auto()];
+                case 2:
+                    upData = _a.sent();
+                    upload = new rawdl_1.rawdl.Upload(upData, {
+                        username: '09c8392061b548eebd4e',
+                        password: 'Z1doL1Qjm6Fq9Yd'
+                    });
+                    return [4 /*yield*/, upload.auto()];
+                case 3:
                     _a.sent();
-                    showsToCheck = checker.getCheckWorthyShowsByDay();
-                    dlData = checker.getAvailShows(showsToCheck);
-                    console.log(dlData);
                     return [2 /*return*/];
             }
         });
