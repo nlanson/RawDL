@@ -19,28 +19,10 @@ async function auto() { //Lazy Mode
 async function semiAuto() { //Somewhat Lazy Mode.
     //Scanning for new releases by day.
     let scanner = new rawdl.Scan(dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080');
-    // let dlData = await scanner.auto();
-    // //Download available new releases.
-    // let torrent = new rawdl.Torrent(dlData, dirname+'/downloads');
-    // let upData = await torrent.auto();
-    let upData = [
-        {
-            path:'C:/Users/Nlanson/Desktop/Coding/RawDL/module/examples/downloads/h.mp4',
-            newPath: 'C:/Users/Nlanson/Desktop/Coding/RawDL/module/examples/downloads/horimiya.mp4',
-            changes: {
-                current: {
-                    "name": "Horimiya",
-                    "nextEp": 4,
-                    "day": 0
-                },
-                new: {
-                    "name": "Horimiya",
-                    "nextEp": 5,
-                    "day": 0
-                }
-            }
-        }
-    ];
+    let dlData = await scanner.auto();
+    //Download available new releases.
+    let torrent = new rawdl.Torrent(dlData, dirname+'/downloads');
+    let upData = await torrent.auto();
     //Upload the completed downloads.
     let upload = new rawdl.Upload(upData, api_keys);
     let uploadResult = await upload.auto();
@@ -48,7 +30,11 @@ async function semiAuto() { //Somewhat Lazy Mode.
     track.auto();
 }
 
-semiAuto();
+async function manual() { //Hardcode Mode.
+    //Module can work with individual methods being changed together. Allows for more customisable code.
+}
+
+auto();
 
 /*
 Upcoming Features:

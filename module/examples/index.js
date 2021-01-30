@@ -62,32 +62,21 @@ function auto() {
 }
 function semiAuto() {
     return __awaiter(this, void 0, void 0, function () {
-        var scanner, upData, upload, uploadResult, track;
+        var scanner, dlData, torrent, upData, upload, uploadResult, track;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     scanner = new rawdl_1.rawdl.Scan(dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080');
-                    upData = [
-                        {
-                            path: 'C:/Users/Nlanson/Desktop/Coding/RawDL/module/examples/downloads/h.mp4',
-                            newPath: 'C:/Users/Nlanson/Desktop/Coding/RawDL/module/examples/downloads/horimiya.mp4',
-                            changes: {
-                                current: {
-                                    "name": "Horimiya",
-                                    "nextEp": 4,
-                                    "day": 0
-                                },
-                                "new": {
-                                    "name": "Horimiya",
-                                    "nextEp": 5,
-                                    "day": 0
-                                }
-                            }
-                        }
-                    ];
+                    return [4 /*yield*/, scanner.auto()];
+                case 1:
+                    dlData = _a.sent();
+                    torrent = new rawdl_1.rawdl.Torrent(dlData, dirname + '/downloads');
+                    return [4 /*yield*/, torrent.auto()];
+                case 2:
+                    upData = _a.sent();
                     upload = new rawdl_1.rawdl.Upload(upData, api_keys);
                     return [4 /*yield*/, upload.auto()];
-                case 1:
+                case 3:
                     uploadResult = _a.sent();
                     track = new rawdl_1.rawdl.Tracker(uploadResult, scanner.json_path);
                     track.auto();
@@ -96,7 +85,14 @@ function semiAuto() {
         });
     });
 }
-semiAuto();
+function manual() {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/];
+        });
+    });
+}
+auto();
 /*
 Upcoming Features:
   -> Single download: Download a single episode(From the past week.)
