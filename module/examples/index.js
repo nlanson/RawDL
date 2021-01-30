@@ -52,9 +52,11 @@ function main() {
                     return [4 /*yield*/, torrent.auto()];
                 case 2:
                     upData = _a.sent();
+                    console.log(upData);
                     upload = new rawdl_1.rawdl.Upload(upData, {
                         username: '09c8392061b548eebd4e',
-                        password: 'Z1doL1Qjm6Fq9Yd'
+                        password: 'Z1doL1Qjm6Fq9Yd',
+                        folder: 'DjOleF2OpRk'
                     });
                     return [4 /*yield*/, upload.auto()];
                 case 3:

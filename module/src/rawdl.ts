@@ -4,7 +4,6 @@ import Parser = require('rss-parser');
 import * as https from 'https';
 import * as fs from 'fs';
 import * as util from 'util';
-import { Console } from 'console';
 
 const parser = new Parser();
 const exec = util.promisify(require('child_process').exec);
@@ -30,7 +29,8 @@ export namespace rawdl {
 
     interface Streamtape_API_Keys {
         username: string,
-        password: string
+        password: string,
+        folder?: string
     }
     
     export class Scan { //This class will scan for released episodes under the shows.json filter.
@@ -139,7 +139,7 @@ export namespace rawdl {
                 let path = await this.download(this.dlDataList[i]); //Returns the path of the downloaded video.
                 let upData = {
                     path: path,
-                    newPath: this.outFolder + '/' + this.dlDataList[i].newTitle
+                    newPath: this.outFolder + '/' + this.dlDataList[i].newTitle + '.mkv' //Combining the output folder and new title to create the new Path.
                 }
                 uploadData.push(upData);
             }
@@ -167,10 +167,10 @@ export namespace rawdl {
             }
             
             return new Promise((resolve, reject) => {
-                console.log('    Webtorrent has recieved a new torrent.')
+                console.log('  -> Webtorrent has recieved a new torrent.')
                 client.add(dlData.link, options, (torrent) => {
                     torrent.on('done', () => {
-                        console.log('        Download Finished')
+                        console.log('    -> Download Finished')
                         torrent.destroy();
                         client.destroy();
                         let torrentDir = this.outFolder + '/' + torrent.name;
@@ -199,27 +199,49 @@ export namespace rawdl {
         public async auto() {
             console.log('Upload Autopilot Engaged');
             for ( let i=0; i<this.uploadDataList.length; i++ ) {
+                console.log(this.uploadDataList[i])
                 let path = await this.rename(this.uploadDataList[i]);
+                console.log(path);
                 let link = await this.getUploadLink();
-                this.upload(path, link);
+                console.log(link)
+                //await this.upload(path, link);
             }
         }
         
-        public rename(upData: UploadData): string {
+        public async rename(upData: UploadData): Promise<string> {
             fs.rename(upData.path, upData.newPath, () => {});
-            return upData.newPath;
+
+            return upData.newPath
         }
         
-        public async  getUploadLink() {
-            //This function should return the retrieved upload link from Streamtape.
-
-            //Using dummy response to test.
-            return 'https://upload.link/lol';
+        public async  getUploadLink(): Promise<any> {
+            let url = (this.api_keys.folder) ? `https://api.streamtape.com/file/ul?login=${this.api_keys.username}&key=${this.api_keys.password}&folder=${this.api_keys.folder}` : `https://api.streamtape.com/file/ul?login=${this.api_keys.username}&key=${this.api_keys.password}`
+           
+            return new Promise((resolve, reject) => {
+                let data:any = '';
+                https.get(url, (res) => {
+                    res.on('data', (chunk) => {
+                        data += chunk;
+                    });
+                    res.on('end', () => {
+                        data = JSON.parse(data);
+                        let link = data.result.url;
+                        resolve(link);
+                    });
+                }).on('error', (err) => {
+                    throw new Error(`Upload URL failed to GET: ${err}`);
+                });
+            });
         }
 
-        public upload(path: string, link: string) {
+        public async upload(path: string, link: string) {
             let command = "curl -F data=@" + path + " " + link;
             console.log(command);
+            try {
+                await exec(command);
+            } catch (err) {
+                throw new Error(`CURL Upload Error: ${err}`);
+            }
         }
 
     }
