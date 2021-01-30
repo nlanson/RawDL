@@ -48,7 +48,6 @@ function main() {
                 case 1:
                     _a.sent();
                     showsToCheck = checker.getCheckWorthyShowsByDay();
-                    console.log(showsToCheck);
                     dlData = checker.getAvailShows(showsToCheck);
                     console.log(dlData);
                     return [2 /*return*/];

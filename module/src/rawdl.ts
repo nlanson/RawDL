@@ -24,6 +24,7 @@ export namespace rawdl {
     
     export class Checker{
         private json_path: string;
+        private title_slice_val: number;
         public rssFeed: any; //RSS Object
         public list: any;
         
@@ -33,6 +34,7 @@ export namespace rawdl {
             this.list = JSON.parse(listRawData);
             
             this.rssFeed = rssFeed;
+            this.title_slice_val = 23 //Default set to 23 to deal with 1080p Title Slice
         }
 
         public async parseRSS() {
@@ -52,10 +54,11 @@ export namespace rawdl {
         }
 
         public getAvailShows(checkList: ShowData[]): DownloadData[] {
+            this.findTitleSliceVal();
             var downloadData: DownloadData[] = [];
 
             this.rssFeed.items.forEach((item: any) => {
-                //Prune item.title and get rid of prefix and suffix.
+                item.title = item.title.slice(13, item.title.length - this.title_slice_val); //Slice item.title to remove SubsPlease Prefix and Suffix.
                 
                 let found = false;
                 let i = 0;
@@ -83,6 +86,10 @@ export namespace rawdl {
             });
 
             return downloadData;
+        }
+
+        private findTitleSliceVal() {
+            this.title_slice_val = (this.rssFeed.description.length == 40) ? 23:22; //If RSS Description is 40 Chars long, set the slice value to 23. Else 22.
         }
 
 
