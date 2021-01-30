@@ -2,4 +2,7 @@
 module/.vscode/
 module/dist/
 module/node_modules/
-module/examples/
+
+module/examples/downloads/
+module/examples/node_modules/
+
