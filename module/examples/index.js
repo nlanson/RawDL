@@ -39,27 +39,19 @@ exports.__esModule = true;
 var rawdl_1 = require("rawdl");
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var dirname, scanner, dlData, torrent, upData, upload;
+        var dirname, api_keys, ap;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     dirname = __dirname;
-                    scanner = new rawdl_1.rawdl.Scan(dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080');
-                    return [4 /*yield*/, scanner.auto()];
-                case 1:
-                    dlData = _a.sent();
-                    torrent = new rawdl_1.rawdl.Torrent(dlData, dirname + '/downloads');
-                    return [4 /*yield*/, torrent.auto()];
-                case 2:
-                    upData = _a.sent();
-                    console.log(upData);
-                    upload = new rawdl_1.rawdl.Upload(upData, {
+                    api_keys = {
                         username: '09c8392061b548eebd4e',
                         password: 'Z1doL1Qjm6Fq9Yd',
                         folder: 'DjOleF2OpRk'
-                    });
-                    return [4 /*yield*/, upload.auto()];
-                case 3:
+                    };
+                    ap = new rawdl_1.rawdl.AutoPilot(dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080', api_keys, dirname + '/downloads');
+                    return [4 /*yield*/, ap.engage()];
+                case 1:
                     _a.sent();
                     return [2 /*return*/];
             }

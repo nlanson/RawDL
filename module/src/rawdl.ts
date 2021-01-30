@@ -33,6 +33,30 @@ export namespace rawdl {
         folder?: string
     }
     
+    export class AutoPilot {
+        private json_path: string;
+        public rssFeed: string;
+        private outFolder: string;
+        private api_keys: Streamtape_API_Keys;
+
+        constructor(json_path: string, rssFeed: string, api_keys: Streamtape_API_Keys, outFolder?: string) {
+            this.json_path = json_path;
+            this.rssFeed = rssFeed;
+            this.outFolder = (outFolder) ? outFolder:__dirname+'/downloads';
+            this.api_keys = api_keys;
+        }
+
+        async engage() {
+            let scanner = new Scan(this.json_path, this.rssFeed);
+            let dlData = await scanner.auto();
+            let torrent = new Torrent(dlData, this.outFolder);
+            let upData = await torrent.auto();
+            let upload = new Upload(upData, this.api_keys);
+            await upload.auto();
+        }
+
+    }
+    
     export class Scan { //This class will scan for released episodes under the shows.json filter.
         private json_path: string;
         private title_slice_val: number;
@@ -100,12 +124,15 @@ export namespace rawdl {
                             link: item.link, //To download the torrent
                             newTitle: newTitle //The path that the video shall become.
                         };
+
                         downloadData.push(dlData);
                     }
 
                     i++;
                 }
             });
+
+            //Increment shows.json nextEp count here and writefile either here or at the end.
 
             return downloadData;
         }
@@ -199,16 +226,13 @@ export namespace rawdl {
         public async auto() {
             console.log('Upload Autopilot Engaged');
             for ( let i=0; i<this.uploadDataList.length; i++ ) {
-                console.log(this.uploadDataList[i])
-                let path = await this.rename(this.uploadDataList[i]);
-                console.log(path);
+                let path = this.rename(this.uploadDataList[i]);
                 let link = await this.getUploadLink();
-                console.log(link)
-                //await this.upload(path, link);
+                await this.upload(path, link);
             }
         }
         
-        public async rename(upData: UploadData): Promise<string> {
+        public rename(upData: UploadData): string {
             fs.rename(upData.path, upData.newPath, () => {});
 
             return upData.newPath
@@ -236,9 +260,11 @@ export namespace rawdl {
 
         public async upload(path: string, link: string) {
             let command = "curl -F data=@" + path + " " + link;
-            console.log(command);
+            //console.log(command);
             try {
+                console.log('  -> Starting Upload');
                 await exec(command);
+                console.log('  -> Upload Finished');
             } catch (err) {
                 throw new Error(`CURL Upload Error: ${err}`);
             }
