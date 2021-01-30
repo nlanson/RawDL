@@ -37,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var rawdl_1 = require("rawdl");
-function main() {
+function auto() {
     return __awaiter(this, void 0, void 0, function () {
         var dirname, api_keys, ap;
         return __generator(this, function (_a) {
@@ -58,4 +58,33 @@ function main() {
         });
     });
 }
-main();
+function semiAuto() {
+    return __awaiter(this, void 0, void 0, function () {
+        var dirname, api_keys, scanner, dlData, torrent, upData, upload;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    dirname = __dirname;
+                    api_keys = {
+                        username: '09c8392061b548eebd4e',
+                        password: 'Z1doL1Qjm6Fq9Yd',
+                        folder: 'DjOleF2OpRk'
+                    };
+                    scanner = new rawdl_1.rawdl.Scan(dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080');
+                    return [4 /*yield*/, scanner.auto()];
+                case 1:
+                    dlData = _a.sent();
+                    torrent = new rawdl_1.rawdl.Torrent(dlData, dirname + '/downloads');
+                    return [4 /*yield*/, torrent.auto()];
+                case 2:
+                    upData = _a.sent();
+                    upload = new rawdl_1.rawdl.Upload(upData, api_keys);
+                    return [4 /*yield*/, upload.auto()];
+                case 3:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+auto();

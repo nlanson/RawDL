@@ -1,5 +1,5 @@
 //Dependencies
-import WebTorrent = require('webtorrent') ;
+import WebTorrent = require('webtorrent');
 import Parser = require('rss-parser');
 import * as https from 'https';
 import * as fs from 'fs';
@@ -197,7 +197,7 @@ export namespace rawdl {
                 console.log('  -> Webtorrent has recieved a new torrent.')
                 client.add(dlData.link, options, (torrent) => {
                     torrent.on('done', () => {
-                        console.log('    -> Download Finished')
+                        console.log('  -> Download Finished')
                         torrent.destroy();
                         client.destroy();
                         let torrentDir = this.outFolder + '/' + torrent.name;
