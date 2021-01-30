@@ -1,8 +1,9 @@
 # User-specific files
 module/.vscode/
+module/.npmignore
+
 module/dist/
 module/node_modules/
-
 module/examples/downloads/
 module/examples/node_modules/
 
