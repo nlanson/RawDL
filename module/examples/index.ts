@@ -1,5 +1,6 @@
 import { rawdl } from 'rawdl';
 
+//Declaring global variables.
 //@ts-ignore Ignore is used here to ignore the IDE from complaining about __dirname not being a known variable when infact it is.
 var dirname = __dirname;
 const api_keys = {
@@ -18,16 +19,36 @@ async function auto() { //Lazy Mode
 async function semiAuto() { //Somewhat Lazy Mode.
     //Scanning for new releases by day.
     let scanner = new rawdl.Scan(dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080');
-    let dlData = await scanner.auto();
-    //Download available new releases.
-    let torrent = new rawdl.Torrent(dlData, dirname+'/downloads');
-    let upData = await torrent.auto();
+    // let dlData = await scanner.auto();
+    // //Download available new releases.
+    // let torrent = new rawdl.Torrent(dlData, dirname+'/downloads');
+    // let upData = await torrent.auto();
+    let upData = [
+        {
+            path:'C:/Users/Nlanson/Desktop/Coding/RawDL/module/examples/downloads/h.mp4',
+            newPath: 'C:/Users/Nlanson/Desktop/Coding/RawDL/module/examples/downloads/horimiya.mp4',
+            changes: {
+                current: {
+                    "name": "Horimiya",
+                    "nextEp": 4,
+                    "day": 0
+                },
+                new: {
+                    "name": "Horimiya",
+                    "nextEp": 5,
+                    "day": 0
+                }
+            }
+        }
+    ];
     //Upload the completed downloads.
     let upload = new rawdl.Upload(upData, api_keys);
-    await upload.auto();
+    let uploadResult = await upload.auto();
+    let track = new rawdl.Tracker(uploadResult, scanner.json_path);
+    track.auto();
 }
 
-auto();
+semiAuto();
 
 /*
 Upcoming Features:

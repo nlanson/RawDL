@@ -1,7 +1,9 @@
-[
-  {
-    "name": "Jujutsu Kaisen",
-    "nextEp": 17,
-    "day": 6
-  }
-]
+{
+  "list": [
+    {
+      "name": "Horimiya",
+      "nextEp": 4,
+      "day": 0
+    }
+  ]
+}

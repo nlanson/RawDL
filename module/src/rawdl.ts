@@ -19,18 +19,25 @@ export namespace rawdl {
     interface DownloadData {
         title: string,
         link: string,
-        newTitle: string
+        newTitle: string,
+        changes?: Json_Changes | undefined
     }
 
     interface UploadData {
         path: string,
-        newPath: string
+        newPath: string,
+        changes?: Json_Changes
     }
 
     interface Streamtape_API_Keys {
         username: string,
         password: string,
         folder?: string
+    }
+
+    interface Json_Changes {
+        current: ShowData
+        new: ShowData
     }
     
     export class AutoPilot {
@@ -47,21 +54,28 @@ export namespace rawdl {
         }
 
         async engage() {
-            let scanner = new Scan(this.json_path, this.rssFeed);
-            let dlData = await scanner.auto();
-            let torrent = new Torrent(dlData, this.outFolder);
-            let upData = await torrent.auto();
-            let upload = new Upload(upData, this.api_keys);
-            await upload.auto();
+            try {
+                let scanner = new Scan(this.json_path, this.rssFeed);
+                let dlData = await scanner.auto();
+                let torrent = new Torrent(dlData, this.outFolder);
+                let upData = await torrent.auto();
+                let upload = new Upload(upData, this.api_keys);
+                let uploadResult = await upload.auto();
+                let track = new Tracker(uploadResult, scanner.json_path);
+                track.auto();
+            } catch (err) {
+                console.log(err);
+            }
         }
 
     }
     
     export class Scan { //This class will scan for released episodes under the shows.json filter.
-        private json_path: string;
+        public json_path: string;
         private title_slice_val: number;
         public rssFeed: any; //RSS Object
         public list: any;
+        private listInstance: any
         
         constructor(json_path: string, rssFeed: string) {
             this.json_path = json_path;
@@ -82,7 +96,7 @@ export namespace rawdl {
         public async parseRSS(): Promise<void> {
             this.rssFeed = await parser.parseURL(this.rssFeed).catch((err) => {
                 throw new Error(`RSS Parse Error: \n ${err}`);
-            })
+            });
         }
         
         public getCheckWorthyShowsByDay(): ShowData[] { //This function creates a list of shows that are potentially available for download.    
@@ -93,7 +107,11 @@ export namespace rawdl {
             var shows: ShowData[] = [];
             this.list.list.forEach((show:any) => {
                 if ( show.day == day ) {
-                    shows.push(show) // Todo: Push the current ep + the next two eps just in case.
+                    shows.push(show)
+                    /* 
+                    Todo: Push the current ep + the next two eps just in case.
+                         - Push a show with the nextEp counter ++
+                    */
                 }
             });
             return(shows);
@@ -111,31 +129,37 @@ export namespace rawdl {
 
                 while ( i < checkList.length && found != true ) {  
                     let nextEp:number|string = checkList[i].nextEp;
-                    nextEp = (nextEp < 10)? "0"+nextEp.toString():nextEp;
-                    let lookingFor = checkList[i].name + " - " + nextEp;
+                    let nextEpString = (nextEp < 10)? "0"+nextEp.toString():nextEp;
+                    let lookingFor = checkList[i].name + " - " + nextEpString;
                     
                     if ( lookingFor == modifiedTitle ) {
                         found = true; 
                         let newTitle = modifiedTitle.replace(/\s/g, '-'); //Remove illegal chars from title.
                         newTitle = newTitle.replace('(', '');
                         newTitle = newTitle.replace(')', '');
+                        let change = { //Creating a change instance to be passed on.
+                            current: checkList[i],
+                            new: checkList[i]
+                        }
+                        change.new.nextEp++;
                         let dlData = {
                             title: item.title, //To access the video without its name changed
                             link: item.link, //To download the torrent
-                            newTitle: newTitle //The path that the video shall become.
+                            newTitle: newTitle, //The path that the video shall become.
+                            changes: change
                         };
 
                         downloadData.push(dlData);
 
                         //Makeshift JSON Counter Increaser. 
                         //Todo: Remove this crap and create a dedicated function for checking for matches and incrementing.
-                        for(let j=0; j<this.list.list.length; j++) {
-                            if(checkList[i].name == this.list.list[i].name) {
-                                let listInstance = this.list.list;
-                                listInstance[j].nextEp = listInstance[j].nextEp +1;
-                                this.writeJSON(listInstance);
-                            }
-                        }
+                        // for(let j=0; j<this.list.list.length; j++) {
+                        //     if(checkList[i].name == this.list.list[i].name) {
+                        //         let listInstance = this.list;
+                        //         listInstance[j].nextEp = listInstance.list[j].nextEp +1;
+                        //         this.writeJSON(listInstance);
+                        //     }
+                        // }
                     }               
 
                     i++;
@@ -179,7 +203,8 @@ export namespace rawdl {
                 let path = await this.download(this.dlDataList[i]); //Returns the path of the downloaded video.
                 let upData = {
                     path: path,
-                    newPath: this.outFolder + '/' + this.dlDataList[i].newTitle + '.mkv' //Combining the output folder and new title to create the new Path.
+                    newPath: this.outFolder + '/' + this.dlDataList[i].newTitle + '.mkv', //Combining the output folder and new title to create the new Path.
+                    changes: (this.dlDataList[i].changes) ? this.dlDataList[i].changes:undefined
                 }
                 uploadData.push(upData);
             }
@@ -238,11 +263,15 @@ export namespace rawdl {
 
         public async auto() {
             console.log('Upload Autopilot Engaged');
+            if(this.uploadDataList.length == 0) throw new Error(`Upload List was Empty`);
+            var changesList: Array<Json_Changes> = [];
             for ( let i=0; i<this.uploadDataList.length; i++ ) {
                 let path = this.rename(this.uploadDataList[i]);
                 let link = await this.getUploadLink();
-                await this.upload(path, link);
+                let result: Json_Changes = await this.upload(path, link, this.uploadDataList[i].changes);
+                changesList.push(result);
             }
+            return changesList;
         }
         
         public rename(upData: UploadData): string {
@@ -271,20 +300,102 @@ export namespace rawdl {
             });
         }
 
-        public async upload(path: string, link: string) {
+        public async upload(path: string, link: string, changes?: Json_Changes) {
             let command = "curl -F data=@" + path + " " + link;
             //console.log(command);
             try {
                 console.log('  -> Starting Upload');
                 await exec(command);
-                console.log('  -> Upload Finished');
+                console.log('    -> Upload Finished');
             } catch (err) {
                 throw new Error(`CURL Upload Error: ${err}`);
             }
+
+            if(!changes) {
+                changes = {
+                    current: {
+                        name: '',
+                        nextEp: -1,
+                        day: -1
+                    },
+                    new: {
+                        name: '',
+                        nextEp: -1,
+                        day: -1
+                    }
+                }
+            }
+            return (changes);
         }
 
     }
 
-    //Todo create a new upload Class with input of streamtape API keys and use this class to upload each downloaded torrent.
+    export class Tracker {
+        private changes: Json_Changes[];
+        private json_path: string;
+        private list: any;
+        private listInstance: any;
+
+        constructor(changes: Json_Changes[], json_path: any) {
+            this.changes = changes;
+            this.json_path = json_path;
+            let listRawData = fs.readFileSync(this.json_path, 'utf8');
+            this.list = JSON.parse(listRawData);
+            this.listInstance = this.list;
+        }
+
+        public auto() {
+            console.log('Tracker AutoPilot Engaged');
+            for(let i=0; i<this.changes.length;i++) {
+                let verifiedChange = (this.verifyChanges(this.changes[i])) ? true:false;
+                if ( verifiedChange == true ) {
+                    console.log('    -> Verified')
+                    this.updateInstance(this.changes[i]);
+                } else {
+                    console.log('    -> Change was not verified.')
+                }
+            }
+            this.writeChanges();
+        }
+
+        public verifyChanges(change: Json_Changes): Boolean {
+            console.log(`  -> Verifying Change for: ${change.current.name}`);
+
+            let ver = (change:Json_Changes, instance: Array<ShowData>):Boolean => { //This function is the logic that returns true or false for verified.
+                if ( change.new.name == '' || change.new.nextEp < 0 ) return false;
+                if ( change.current.name == '' || change.current.nextEp < 0 ) return false;
+                
+                let i: number = 0;
+                let found:Boolean = false;
+                while ( i < instance.length && found != true ) {
+                    if (instance[i].name == change.current.name && instance[i].nextEp == change.current.nextEp) {
+                        found = true;
+                        return true;
+                    }
+                }
+                return false;
+            }
+            let verification = (ver(change, this.listInstance.list)) ? true:false; //let verification = ver(change, this.listInstance.list)
+            return verification;
+        }
+
+        public updateInstance(change: Json_Changes) {
+           let i=0;
+           let found = false;
+           while(i<this.listInstance.list.length && found != true) {
+            if( this.listInstance.list[i].name == change.current.name && this.listInstance.list[i].nextEp == change.current.nextEp) {
+                found = true;
+                //this.listInstance.list[i] = change.new;
+                this.listInstance.list.splice(i, 1, change.new)
+            }
+
+            i++
+           }
+        }
+
+        public writeChanges() {
+            fs.writeFileSync(this.json_path, JSON.stringify(this.listInstance, null, 2))
+        }
+    }
 
 }
