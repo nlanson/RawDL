@@ -1,4 +1,3 @@
 # RawDL💮
-
-RawDL is a node utility to schedule and download seasonal anime series.
+This package allows for easy scheduled seasonal anime download and subsequent upload.
 
