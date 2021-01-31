@@ -20,16 +20,20 @@ async function auto() { //Lazy Mode
     await ap.engage();
 }
 
-async function semiAuto() { //Somewhat Lazy Mode.
+async function semiAuto() { //Somewhat Lazy Mode. Seperated into seperate classes.
     //Scanning for new releases by day.
     let scanner = new rawdl.Scan(dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080');
     let dlData = await scanner.auto();
+
     //Download available new releases.
     let torrent = new rawdl.Torrent(dlData, dirname+'/downloads');
     let upData = await torrent.auto();
+
     //Upload the completed downloads.
     let upload = new rawdl.Upload(upData, api_keys);
     let uploadResult = await upload.auto();
+
+    //Update the shows.json
     let track = new rawdl.Tracker(uploadResult, scanner.json_path);
     track.auto();
 }

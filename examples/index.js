@@ -122,9 +122,9 @@ function uploadVideos() {
 /*
     Functions
 */
-auto();
+//auto();
 //semiAuto();
-//uploadVideos();
+uploadVideos();
 /*
 Upcoming Features:
   -> Single download: Download a single episode(From the past week.)
