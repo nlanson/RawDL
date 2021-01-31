@@ -1,6 +1,0 @@
-# User-specific files
-./.vscode/
-./.gitignore
-./dist/
-./node_modules/
-./examples/

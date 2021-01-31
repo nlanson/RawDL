@@ -10,7 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/node": "^14.14.22",
-    "rawdl": "file:.."
+    "rawdl": "^1.0.0"
   }
 }
