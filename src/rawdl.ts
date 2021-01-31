@@ -16,20 +16,20 @@ export namespace rawdl {
         day: number
     }
 
-    interface DownloadData {
+    export interface DownloadData {
         title: string,
         link: string,
         newTitle: string,
         changes?: Json_Changes | undefined
     }
 
-    interface UploadData {
+    export interface UploadData {
         path: string,
         newPath: string,
         changes?: Json_Changes
     }
 
-    interface Streamtape_API_Keys {
+    export interface Streamtape_API_Keys {
         username: string,
         password: string,
         folder?: string
@@ -169,11 +169,11 @@ export namespace rawdl {
             return downloadData;
         }
 
-        private findTitleSliceVal() {
+        private findTitleSliceVal(): void {
             this.title_slice_val = (this.rssFeed.description.length == 40) ? 23:22; //If RSS Description is 40 Chars long, set the slice value to 23. Else 22.
         }
 
-        public writeJSON(list: any) {
+        public writeJSON(list: any): void {
             console.log('write function');
             fs.writeFileSync(this.json_path, JSON.stringify(list, null, 2))
         }
@@ -213,7 +213,7 @@ export namespace rawdl {
             return uploadData;
         }
 
-        private async createOutFolder() {
+        private async createOutFolder(): Promise<void> {
             //console.log(this.outFolder);
             if (!fs.existsSync(this.outFolder)) {
                 fs.mkdirSync(this.outFolder);
@@ -221,7 +221,7 @@ export namespace rawdl {
             }
         }
 
-        public changeOutFolder(newDir: string) {
+        public changeOutFolder(newDir: string): void {
             this.outFolder = newDir;
             this.createOutFolder();
         }
@@ -301,7 +301,7 @@ export namespace rawdl {
             });
         }
 
-        public async upload(path: string, link: string, changes?: Json_Changes) {
+        public async upload(path: string, link: string, changes?: Json_Changes): Promise<Json_Changes> {
             let command = "curl -F data=@" + path + " " + link;
             //console.log(command);
             try {
@@ -345,7 +345,7 @@ export namespace rawdl {
             this.listInstance = this.list;
         }
 
-        public auto() {
+        public auto(): void {
             console.log('Tracker AutoPilot Engaged');
             for(let i=0; i<this.changes.length;i++) {
                 let verifiedChange = (this.verifyChanges(this.changes[i])) ? true:false;
@@ -381,7 +381,7 @@ export namespace rawdl {
             return verification;
         }
 
-        public updateInstance(change: Json_Changes) {
+        public updateInstance(change: Json_Changes): void {
            let i=0;
            let found = false;
            while(i<this.listInstance.list.length && found != true) {
@@ -395,7 +395,7 @@ export namespace rawdl {
            }
         }
 
-        public writeChanges() {
+        public writeChanges(): void {
             fs.writeFileSync(this.json_path, JSON.stringify(this.listInstance, null, 2))
         }
     }
