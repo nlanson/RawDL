@@ -10,6 +10,10 @@ const api_keys = {
 };
 
 
+/*
+    Scheduled Upload Methods.
+*/
+
 async function auto() { //Lazy Mode
     //Create a new instance of AP with necessary params (shows.json, SubsPlease RSS Feed, Streamtape API Keys, Output Folder);
     let ap = new rawdl.AutoPilot(dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080', api_keys, dirname+'/downloads');
@@ -34,7 +38,33 @@ async function manual() { //Hardcode Mode.
     //Module can work with individual methods being changed together. Allows for more customisable code.
 }
 
-//auto();
+
+/*
+    Uploading a Video.
+*/
+
+async function uploadVideos() {
+    let upData = [ //Array of videos to upload. Use same path & newPath properties to not change name. Could also be a param.
+        {
+            path: 'C:/Users/Nlanson/Desktop/Coding/RawDL/examples/downloads/video.mp4',
+            newPath: 'C:/Users/Nlanson/Desktop/Coding/RawDL/examples/downloads/videoEditedTitle.mp4'
+        }
+    ]
+    
+    let upload = new rawdl.Upload(upData, api_keys);    
+    await upload.auto();
+}
+
+
+
+/*
+    Functions
+*/
+
+auto();
+//semiAuto();
+//uploadVideos();
+
 
 /*
 Upcoming Features:
@@ -42,25 +72,3 @@ Upcoming Features:
   -> Utility: To help create shows.json, dlData and upData objects.
 
 */
-
-async function test() {
-    let changes = [
-        {
-            current: {
-                name: 'Horimiya',
-                nextEp: 4,
-                day: 0
-            },
-            new:  {
-                name: 'Horimiya',
-                nextEp: 5,
-                day: 0
-            }
-        }
-    ]
-    
-    let track =  new rawdl.Tracker(changes, dirname+"/shows.json");
-    track.auto();
-}
-
-test();     

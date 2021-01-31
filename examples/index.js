@@ -45,6 +45,9 @@ var api_keys = {
     password: 'Z1doL1Qjm6Fq9Yd',
     folder: 'DjOleF2OpRk'
 };
+/*
+    Scheduled Upload Methods.
+*/
 function auto() {
     return __awaiter(this, void 0, void 0, function () {
         var ap;
@@ -92,35 +95,39 @@ function manual() {
         });
     });
 }
-//auto();
+/*
+    Uploading a Video.
+*/
+function uploadVideos() {
+    return __awaiter(this, void 0, void 0, function () {
+        var upData, upload;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    upData = [
+                        {
+                            path: 'C:/Users/Nlanson/Desktop/Coding/RawDL/examples/downloads/video.mp4',
+                            newPath: 'C:/Users/Nlanson/Desktop/Coding/RawDL/examples/downloads/videoEditedTitle.mp4'
+                        }
+                    ];
+                    upload = new rawdl_1.rawdl.Upload(upData, api_keys);
+                    return [4 /*yield*/, upload.auto()];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+/*
+    Functions
+*/
+auto();
+//semiAuto();
+//uploadVideos();
 /*
 Upcoming Features:
   -> Single download: Download a single episode(From the past week.)
   -> Utility: To help create shows.json, dlData and upData objects.
 
 */
-function test() {
-    return __awaiter(this, void 0, void 0, function () {
-        var changes, track;
-        return __generator(this, function (_a) {
-            changes = [
-                {
-                    current: {
-                        name: 'Horimiya',
-                        nextEp: 4,
-                        day: 0
-                    },
-                    "new": {
-                        name: 'Horimiya',
-                        nextEp: 5,
-                        day: 0
-                    }
-                }
-            ];
-            track = new rawdl_1.rawdl.Tracker(changes, dirname + "/shows.json");
-            track.auto();
-            return [2 /*return*/];
-        });
-    });
-}
-test();
