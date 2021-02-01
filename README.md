@@ -30,9 +30,9 @@ import { rawdl } from 'rawdl';
 
 var dirname = __dirname;
 const api_keys = {
-    username: '09c8392061b548eebd4e',
-    password: 'Z1doL1Qjm6Fq9Yd',
-    folder: 'DjOleF2OpRk'
+    username: '<<your api username here>>',
+    password: '<<your api key here>>',
+    folder: '<<your api folder id here>>'
 };
 
 
