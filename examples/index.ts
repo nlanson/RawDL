@@ -4,9 +4,9 @@ import { rawdl } from 'rawdl';
 //@ts-ignore Ignore is used here to ignore the IDE from complaining about __dirname not being a known variable when infact it is.
 var dirname = __dirname;
 const api_keys = {
-    username: '09c8392061b548eebd4e',
-    password: 'Z1doL1Qjm6Fq9Yd',
-    folder: 'DjOleF2OpRk'
+    username: '<<streamtape api username>>',
+    password: '<<streamtape api password>>',
+    folder: '<<streamtape folder id>>'
 };
 
 
