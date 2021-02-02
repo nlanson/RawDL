@@ -55,7 +55,23 @@ function auto() {
             switch (_a.label) {
                 case 0:
                     ap = new rawdl_1.rawdl.AutoPilot(dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080', api_keys, dirname + '/downloads');
-                    return [4 /*yield*/, ap.engage()];
+                    return [4 /*yield*/, ap.full()];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function auto_Download_Only() {
+    return __awaiter(this, void 0, void 0, function () {
+        var ap;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    console.log('download only');
+                    ap = new rawdl_1.rawdl.AutoPilot(dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080', api_keys, dirname + '/downloads');
+                    return [4 /*yield*/, ap.downloadOnly()];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
@@ -88,43 +104,12 @@ function semiAuto() {
         });
     });
 }
-function manual() {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            return [2 /*return*/];
-        });
-    });
-}
-/*
-    Uploading a Video.
-*/
-function uploadVideos() {
-    return __awaiter(this, void 0, void 0, function () {
-        var upData, upload;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    upData = [
-                        {
-                            path: 'C:/Users/Nlanson/Desktop/Coding/RawDL/examples/downloads/video.mp4',
-                            newPath: 'C:/Users/Nlanson/Desktop/Coding/RawDL/examples/downloads/videoEditedTitle.mp4'
-                        }
-                    ];
-                    upload = new rawdl_1.rawdl.Upload(upData, api_keys);
-                    return [4 /*yield*/, upload.auto()];
-                case 1:
-                    _a.sent();
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
 /*
     Functions
 */
-auto();
+//auto_Down_and_Up();
+auto_Download_Only();
 //semiAuto();
-//uploadVideos();
 /*
 Upcoming Features:
   -> Single download: Download a single episode(From the past week.)

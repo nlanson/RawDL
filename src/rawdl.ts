@@ -17,16 +17,16 @@ export namespace rawdl {
     }
 
     export interface DownloadData {
-        title: string,
-        link: string,
-        newTitle: string,
-        changes?: Json_Changes | undefined
+        title: string, //Torrent Title
+        link: string, //Torrent Link
+        newTitle: string, //Torrent Rename Title (Passed into UploadData for rename)
+        changes: Json_Changes //Json Changes 
     }
 
     export interface UploadData {
-        path: string,
-        newPath: string,
-        changes?: Json_Changes
+        path: string, //Current video Path
+        newPath: string, //New video path (From DownloadData newTitle)
+        changes: Json_Changes //Json Changes
     }
 
     export interface Streamtape_API_Keys {
@@ -36,7 +36,8 @@ export namespace rawdl {
     }
 
     interface Json_Changes {
-        current: ShowData
+        real: Boolean //To validate if changes are real
+        current: ShowData //Current shows.json entry to contrast new against.
         new: ShowData
     }
     
@@ -53,15 +54,33 @@ export namespace rawdl {
             this.api_keys = api_keys;
         }
 
-        async engage() {
+        async full() {
             try {
                 let scanner = new Scan(this.json_path, this.rssFeed);
-                let dlData = await scanner.auto();
+                let dlData: DownloadData[] = await scanner.auto(); //Contains Torrent Info eg: Link, Rename Title, and JSON changes.
                 let torrent = new Torrent(dlData, this.outFolder);
-                let upData = await torrent.auto();
+                let upData: UploadData[] = await torrent.auto(); //Contains Upload Data eg: current path & rename path.
                 let upload = new Upload(upData, this.api_keys);
-                let uploadResult = await upload.auto();
+                let uploadResult: Json_Changes[] = await upload.auto(); //Contains JSON Changes to validate and write.
                 let track = new Tracker(uploadResult, this.json_path);
+                track.auto();
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+        async downloadOnly() {
+            try {
+                let scanner = new Scan(this.json_path, this.rssFeed);
+                let dlData: DownloadData[] = await scanner.auto();
+                let torrent = new Torrent(dlData, this.outFolder);
+                let upData: UploadData[] = await torrent.auto();
+                
+                let changes: Json_Changes[] = [];
+                for(let i=0; i<upData.length; i++) {
+                    changes.push(upData[i].changes);
+                }
+                let track = new Tracker(changes, this.json_path);
                 track.auto();
             } catch (err) {
                 console.log(err);
@@ -75,7 +94,6 @@ export namespace rawdl {
         private title_slice_val: number;
         public rssFeed: any; //RSS Object
         public list: any;
-        private listInstance: any
         
         constructor(json_path: string, rssFeed: string) {
             this.json_path = json_path;
@@ -137,11 +155,14 @@ export namespace rawdl {
                         let newTitle = modifiedTitle.replace(/\s/g, '-'); //Remove illegal chars from title.
                         newTitle = newTitle.replace('(', '');
                         newTitle = newTitle.replace(')', '');
+                        console.log(checkList[i]);
                         let change = { //Creating a change instance to be passed on.
                             current: checkList[i],
-                            new: checkList[i]
+                            new: { ...checkList[i], nextEp: checkList[i].nextEp + 1 }, //Copy all of checkList[i] exept nextEp which will be checkList[i].nextEp + 1
+                            real: true
                         }
-                        change.new.nextEp++;
+                        console.log(change);
+                        
                         let dlData = {
                             title: item.title, //To access the video without its name changed
                             link: item.link, //To download the torrent
@@ -150,16 +171,6 @@ export namespace rawdl {
                         };
 
                         downloadData.push(dlData);
-
-                        //Makeshift JSON Counter Increaser. 
-                        //Todo: Remove this crap and create a dedicated function for checking for matches and incrementing.
-                        // for(let j=0; j<this.list.list.length; j++) {
-                        //     if(checkList[i].name == this.list.list[i].name) {
-                        //         let listInstance = this.list;
-                        //         listInstance[j].nextEp = listInstance.list[j].nextEp +1;
-                        //         this.writeJSON(listInstance);
-                        //     }
-                        // }
                     }               
 
                     i++;
@@ -173,7 +184,7 @@ export namespace rawdl {
             this.title_slice_val = (this.rssFeed.description.length == 40) ? 23:22; //If RSS Description is 40 Chars long, set the slice value to 23. Else 22.
         }
 
-        public writeJSON(list: any): void {
+        private writeJSON(list: any): void { //Makeshift
             console.log('write function');
             fs.writeFileSync(this.json_path, JSON.stringify(list, null, 2))
         }
@@ -205,7 +216,19 @@ export namespace rawdl {
                 let upData = {
                     path: path,
                     newPath: this.outFolder + '/' + this.dlDataList[i].newTitle + '.mkv', //Combining the output folder and new title to create the new Path.
-                    changes: (this.dlDataList[i].changes) ? this.dlDataList[i].changes:undefined
+                    changes: (this.dlDataList[i].changes) ? this.dlDataList[i].changes:{
+                        current: {
+                            name: '',
+                            nextEp: 0,
+                            day: -1
+                        },
+                        new: {
+                            name: '',
+                            nextEp: 0,
+                            day: -1
+                        },
+                        real: false
+                    }
                 }
                 uploadData.push(upData);
             }
@@ -233,8 +256,8 @@ export namespace rawdl {
             }
             
             return new Promise((resolve, reject) => {
-                console.log('  -> Webtorrent has recieved a new torrent.')
                 client.add(dlData.link, options, (torrent) => {
+                    console.log(`  -> Downloading ${torrent.name}`)
                     torrent.on('done', () => {
                         console.log('  -> Download Finished')
                         torrent.destroy();
@@ -305,7 +328,7 @@ export namespace rawdl {
             let command = "curl -F data=@" + path + " " + link;
             //console.log(command);
             try {
-                console.log('  -> Starting Upload');
+                console.log(`  -> Uploading ${path}`);
                 await exec(command);
                 console.log('    -> Upload Finished');
             } catch (err) {
@@ -323,7 +346,8 @@ export namespace rawdl {
                         name: '',
                         nextEp: -1,
                         day: -1
-                    }
+                    },
+                    real: false
                 }
             }
             return (changes);
@@ -350,10 +374,10 @@ export namespace rawdl {
             for(let i=0; i<this.changes.length;i++) {
                 let verifiedChange = (this.verifyChanges(this.changes[i])) ? true:false;
                 if ( verifiedChange == true ) {
-                    console.log('    -> Verified')
+                    console.log('  -> Verified')
                     this.updateInstance(this.changes[i]);
                 } else {
-                    console.log('    -> Change was not verified.')
+                    console.log('  -> Change was not verified.')
                 }
             }
             this.writeChanges();
@@ -363,6 +387,9 @@ export namespace rawdl {
             console.log(`  -> Verifying Change for: ${change.current.name}`);
 
             let ver = (change:Json_Changes, instance: Array<ShowData>):Boolean => { //This function is the logic that returns true or false for verified.
+                console.log(change);
+                
+                if ( change.real == false ) return false;
                 if ( change.new.name == '' || change.new.nextEp < 0 ) return false;
                 if ( change.current.name == '' || change.current.nextEp < 0 ) return false;
                 

@@ -39,7 +39,14 @@ const api_keys = {
 async function auto() {
     //Params (shows.json, SubsPlease RSS Feed, Streamtape API Keys, Output Folder);
     let ap = new rawdl.AutoPilot(dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080', api_keys, dirname+'/downloads');
-    await ap.engage();
+    await ap.full();
+}
+
+//OR if you want download only and not upload
+
+async function downloadOnly() {
+  let ap = new rawdl.AutoPilot(dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080', api_keys, dirname+'/downloads');
+    await ap.downloadOnly();
 }
 
 ```

@@ -17,7 +17,13 @@ const api_keys = {
 async function auto() { //Lazy Mode
     //Create a new instance of AP with necessary params (shows.json, SubsPlease RSS Feed, Streamtape API Keys, Output Folder);
     let ap = new rawdl.AutoPilot(dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080', api_keys, dirname+'/downloads');
-    await ap.engage();
+    await ap.full();
+}
+
+async function auto_Download_Only() {
+    console.log('download only');
+    let ap = new rawdl.AutoPilot(dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080', api_keys, dirname+'/downloads');
+    await ap.downloadOnly();
 }
 
 async function semiAuto() { //Somewhat Lazy Mode. Seperated into seperate classes.
@@ -38,36 +44,16 @@ async function semiAuto() { //Somewhat Lazy Mode. Seperated into seperate classe
     track.auto();
 }
 
-async function manual() { //Hardcode Mode.
-    //Module can work with individual methods being changed together. Allows for more customisable code.
-}
-
-
-/*
-    Uploading a Video.
-*/
-
-async function uploadVideos() {
-    let upData = [ //Array of videos to upload. Use same path & newPath properties to not change name. Could also be a param.
-        {
-            path: 'C:/Users/Nlanson/Desktop/Coding/RawDL/examples/downloads/video.mp4',
-            newPath: 'C:/Users/Nlanson/Desktop/Coding/RawDL/examples/downloads/videoEditedTitle.mp4'
-        }
-    ]
-    
-    let upload = new rawdl.Upload(upData, api_keys);    
-    await upload.auto();
-}
-
 
 
 /*
     Functions
 */
 
-auto();
+//auto_Down_and_Up();
+auto_Download_Only();
 //semiAuto();
-//uploadVideos();
+
 
 
 /*
