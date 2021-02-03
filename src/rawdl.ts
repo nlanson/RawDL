@@ -35,7 +35,7 @@ export namespace rawdl {
         folder?: string
     }
 
-    interface Json_Changes {
+    export interface Json_Changes {
         real: Boolean //To validate if changes are real
         current: ShowData //Current shows.json entry to contrast new against.
         new: ShowData
@@ -54,7 +54,7 @@ export namespace rawdl {
             this.api_keys = api_keys;
         }
 
-        async full() {
+        public async full() {
             try {
                 let scanner = new Scan(this.json_path, this.rssFeed);
                 let dlData: DownloadData[] = await scanner.auto(); //Contains Torrent Info eg: Link, Rename Title, and JSON changes.
@@ -69,7 +69,7 @@ export namespace rawdl {
             }
         }
 
-        async downloadOnly() {
+        public async downloadOnly() {
             try {
                 let scanner = new Scan(this.json_path, this.rssFeed);
                 let dlData: DownloadData[] = await scanner.auto();
@@ -155,13 +155,12 @@ export namespace rawdl {
                         let newTitle = modifiedTitle.replace(/\s/g, '-'); //Remove illegal chars from title.
                         newTitle = newTitle.replace('(', '');
                         newTitle = newTitle.replace(')', '');
-                        console.log(checkList[i]);
+
                         let change = { //Creating a change instance to be passed on.
                             current: checkList[i],
                             new: { ...checkList[i], nextEp: checkList[i].nextEp + 1 }, //Copy all of checkList[i] exept nextEp which will be checkList[i].nextEp + 1
                             real: true
                         }
-                        console.log(change);
                         
                         let dlData = {
                             title: item.title, //To access the video without its name changed
@@ -254,14 +253,23 @@ export namespace rawdl {
             var options = {
                 path: this.outFolder
             }
-            
             return new Promise((resolve, reject) => {
                 client.add(dlData.link, options, (torrent) => {
-                    console.log(`  -> Downloading ${torrent.name}`)
+                    console.log(`  -> Downloading: ${torrent.name}`);
+                    
+                    //Ram monitoring listener. Can be removed
+                    torrent.on('download', () => {
+                        let usage = process.memoryUsage().heapUsed;
+                        let avail = process.memoryUsage().heapTotal;
+                        process.stdout.write(`  -> Memory Usage: ${Math.floor(usage/1024/1024)}/${Math.floor(avail/1024/1024)}MB \r`);
+                    })
+
                     torrent.on('done', () => {
-                        console.log('  -> Download Finished')
+                        console.log(`  -> Download Finished - File Size: ${Math.floor(torrent.downloaded/1024/1024)}MB`);
                         torrent.destroy();
                         client.destroy();
+                        torrent.removeAllListeners();
+                        client.removeAllListeners();
                         let torrentDir = this.outFolder + '/' + torrent.name;
                         resolve(torrentDir);
                     });
@@ -270,6 +278,20 @@ export namespace rawdl {
                     })
                 })
             })
+        }
+
+        private monitorHeap(torrent: WebTorrent.Torrent) {
+            var done = false; //RAM CHECK FLAG
+            
+            do {
+                let usage = process.memoryUsage().heapUsed;
+                let avail = process.memoryUsage().heapTotal;
+                process.stdout.write(`  -> Memory Usage: ${Math.floor(usage/1024/1024)}/${Math.floor(avail/1024/1024)}MB \r`);
+                setTimeout(() => {}, 500);
+            } while (done == false);
+
+            torrent.on('done', () => done = true);
+
         }
 
     }
@@ -304,7 +326,7 @@ export namespace rawdl {
             return upData.newPath
         }
         
-        public async  getUploadLink(): Promise<any> {
+        public async getUploadLink(): Promise<any> {
             let url = (this.api_keys.folder) ? `https://api.streamtape.com/file/ul?login=${this.api_keys.username}&key=${this.api_keys.password}&folder=${this.api_keys.folder}` : `https://api.streamtape.com/file/ul?login=${this.api_keys.username}&key=${this.api_keys.password}`
            
             return new Promise((resolve, reject) => {
@@ -374,10 +396,10 @@ export namespace rawdl {
             for(let i=0; i<this.changes.length;i++) {
                 let verifiedChange = (this.verifyChanges(this.changes[i])) ? true:false;
                 if ( verifiedChange == true ) {
-                    console.log('  -> Verified')
+                    console.log('  -> Verified');
                     this.updateInstance(this.changes[i]);
                 } else {
-                    console.log('  -> Change was not verified.')
+                    console.log('  -> Change was not verified.');
                 }
             }
             this.writeChanges();
@@ -387,7 +409,6 @@ export namespace rawdl {
             console.log(`  -> Verifying Change for: ${change.current.name}`);
 
             let ver = (change:Json_Changes, instance: Array<ShowData>):Boolean => { //This function is the logic that returns true or false for verified.
-                console.log(change);
                 
                 if ( change.real == false ) return false;
                 if ( change.new.name == '' || change.new.nextEp < 0 ) return false;
