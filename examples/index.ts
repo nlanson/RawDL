@@ -50,8 +50,8 @@ async function semiAuto() { //Somewhat Lazy Mode. Seperated into seperate classe
     Functions
 */
 
-//auto_Down_and_Up();
-auto_Download_Only();
+auto();
+//auto_Download_Only();
 //semiAuto();
 
 
