@@ -26,6 +26,11 @@ async function auto_Download_Only() {
     await ap.downloadOnly();
 }
 
+async function upload_then_delete() {
+    let ap = new rawdl.AutoPilot(dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080', api_keys, dirname+'/downloads');
+    await ap.full_delete();
+}
+
 async function semiAuto() { //Somewhat Lazy Mode. Seperated into seperate classes.
     //Scanning for new releases by day.
     let scanner = new rawdl.Scan(dirname + '/shows.json', 'https://subsplease.org/rss/?t&r=1080');
@@ -51,6 +56,7 @@ async function semiAuto() { //Somewhat Lazy Mode. Seperated into seperate classe
 */
 
 auto();
+//upload_then_delete();
 //auto_Download_Only();
 //semiAuto();
 

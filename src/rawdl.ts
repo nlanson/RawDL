@@ -60,7 +60,22 @@ export namespace rawdl {
                 let dlData: DownloadData[] = await scanner.auto(); //Contains Torrent Info eg: Link, Rename Title, and JSON changes.
                 let torrent = new Torrent(dlData, this.outFolder);
                 let upData: UploadData[] = await torrent.auto(); //Contains Upload Data eg: current path & rename path.
-                let upload = new Upload(upData, this.api_keys);
+                let upload = new Upload(upData, this.api_keys, false); //Upload but dont delete.
+                let uploadResult: Json_Changes[] = await upload.auto(); //Contains JSON Changes to validate and write.
+                let track = new Tracker(uploadResult, this.json_path);
+                track.auto();
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+        public async full_delete() {
+            try {
+                let scanner = new Scan(this.json_path, this.rssFeed);
+                let dlData: DownloadData[] = await scanner.auto(); //Contains Torrent Info eg: Link, Rename Title, and JSON changes.
+                let torrent = new Torrent(dlData, this.outFolder);
+                let upData: UploadData[] = await torrent.auto(); //Contains Upload Data eg: current path & rename path.
+                let upload = new Upload(upData, this.api_keys, true); //Upload and then delete
                 let uploadResult: Json_Changes[] = await upload.auto(); //Contains JSON Changes to validate and write.
                 let track = new Tracker(uploadResult, this.json_path);
                 track.auto();
@@ -301,10 +316,12 @@ export namespace rawdl {
     export class Upload {
         private api_keys: Streamtape_API_Keys;
         private uploadDataList: Array<UploadData>;
+        public deleteFile: Boolean
 
-        constructor( uploadDataList: Array<UploadData>, api_keys: Streamtape_API_Keys ) {
+        constructor( uploadDataList: Array<UploadData>, api_keys: Streamtape_API_Keys, deleteFile?: Boolean ) {
             this.api_keys = api_keys;
             this.uploadDataList = uploadDataList;
+            this.deleteFile = (deleteFile) ? deleteFile:false;
         }
 
         public async auto() {
@@ -316,6 +333,7 @@ export namespace rawdl {
                 let link = await this.getUploadLink();
                 let result: Json_Changes = await this.upload(path, link, this.uploadDataList[i].changes);
                 changesList.push(result);
+                if (this.deleteFile) this.delete(path);
             }
             return changesList;
         }
@@ -373,6 +391,10 @@ export namespace rawdl {
                 }
             }
             return (changes);
+        }
+
+        public delete(path: string) {
+            fs.unlinkSync(path);
         }
 
     }
