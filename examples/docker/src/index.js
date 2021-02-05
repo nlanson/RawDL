@@ -2,9 +2,9 @@ const rawdl = require('rawdl');
 
 async function main() {
     const api_keys = {
-        username: '09c8392061b548eebd4e',
-        password: 'Z1doL1Qjm6Fq9Yd',
-        folder: 'DjOleF2OpRk'
+        username: '',
+        password: '',
+        folder: ''
     };
 
     console.log('Starting Rawdl Package...')

@@ -9,7 +9,7 @@ Use npm to install the package.
 npm i rawdl
 ```
 
-## Usage
+## Usage (NodeJS)
 Create a valid shows.json file: (example)
 ```json
 {
