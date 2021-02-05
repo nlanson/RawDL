@@ -1,6 +1,11 @@
 # User-specific files.
 .vscode/
 dist/
-examples/node_modules/
-examples/downloads/
 node_modules/
+
+
+examples/js/node_modules
+examples/js/downloads
+
+examples/docker/data/downloads
+examples/docker/node_modules

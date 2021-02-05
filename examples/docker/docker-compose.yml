@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  anime: 
+    image: nlanson/rawdl:test
+    volumes:
+      - "./data:/data"
+    container_name: rawdl
+    tty: true
+    stdin_open: true
