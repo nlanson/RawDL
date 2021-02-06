@@ -9,3 +9,7 @@ examples/js/downloads
 
 examples/docker/data/downloads
 examples/docker/node_modules
+
+docker/do/node_modules
+docker/f/node_modules
+docker/fd/node_modules

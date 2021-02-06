@@ -2,3 +2,4 @@
 .vscode/
 examples/
 node_modules/
+docker/

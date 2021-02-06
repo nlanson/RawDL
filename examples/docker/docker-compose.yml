@@ -1,10 +1,14 @@
 version: "3"
 
 services:
-  anime: 
-    image: nlanson/rawdl:test
+  anime:
+    image: nlanson/rawdl:fd
+    environment:
+      API_USERNAME: "09c8392061b548eebd4e"
+      API_PASSWORD: "Z1doL1Qjm6Fq9Yd"
+      API_FOLDER: "DjOleF2OpRk"
     volumes:
       - "./data:/data"
-    container_name: rawdl
+    container_name: anime
     tty: true
     stdin_open: true
