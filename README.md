@@ -86,7 +86,12 @@ version: "3"
 services:
   anime: 
     image: nlanson/rawdl:fd
+    # There are other images for different run modes. 
+    # nlanson/rawdl:fd for Full download and upload as well as file deletion upon completion.
+    # nlanson/rawdl:f for Full download and upload and keeping files.
+    # nlanson/rawdl:do for Download only and no upload.
     environment:
+    #If you are using the Download Only Image (nlanson/rawdl:do), no environment variables are necessary.
       API_USERNAME: '<your streamtape api username>'
       API_PASSWORD: '<your streamtape api password>'
       API_FOLDER: '<your streamtape folder id>'
