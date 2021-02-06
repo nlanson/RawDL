@@ -85,7 +85,7 @@ version: "3"
 
 services:
   anime: 
-    image: nlanson/rawdl:latest
+    image: nlanson/rawdl:fd
     environment:
       API_USERNAME: '<your streamtape api username>'
       API_PASSWORD: '<your streamtape api password>'
@@ -104,4 +104,3 @@ Now the container should read the shows.json file from the mounted ./data/shows.
 
 ## Upcoming
 - Utility feature to aide creating shows.json
-- Seperate docker images for auto, auto_delete and auto_downloadOnly. 
