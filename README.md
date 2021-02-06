@@ -109,3 +109,4 @@ Now the container should read the shows.json file from the mounted ./data/shows.
 
 ## Upcoming
 - Utility feature to aide creating shows.json
+- Utility to aide setup of the script environment.

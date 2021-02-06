@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "rawdl": "^1.1.5"
+    "rawdl": "^1.1.7"
   }
 }
