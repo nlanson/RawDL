@@ -47,14 +47,19 @@ export namespace rawdl {
         private outFolder: string;
         private api_keys: Streamtape_API_Keys;
 
-        constructor(json_path: string, rssFeed: string, api_keys: Streamtape_API_Keys, outFolder?: string) {
+        constructor(json_path: string, rssFeed: string, api_keys?: Streamtape_API_Keys, outFolder?: string) {
             this.json_path = json_path;
             this.rssFeed = rssFeed;
             this.outFolder = (outFolder) ? outFolder:__dirname+'/downloads';
-            this.api_keys = api_keys;
+            this.api_keys = (api_keys) ? api_keys: {
+                username: '',
+                password: ''
+            }
         }
 
         public async full() {
+            if (this.api_keys.username == '' || this.api_keys.password == '') throw new Error('Cannot upload without API Keys.');
+            
             try {
                 let scanner = new Scan(this.json_path, this.rssFeed);
                 let dlData: DownloadData[] = await scanner.auto(); //Contains Torrent Info eg: Link, Rename Title, and JSON changes.
@@ -70,6 +75,8 @@ export namespace rawdl {
         }
 
         public async full_delete() {
+            if (this.api_keys.username == '' || this.api_keys.password == '') throw new Error('Cannot upload without API Keys.');
+            
             try {
                 let scanner = new Scan(this.json_path, this.rssFeed);
                 let dlData: DownloadData[] = await scanner.auto(); //Contains Torrent Info eg: Link, Rename Title, and JSON changes.
