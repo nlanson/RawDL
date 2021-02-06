@@ -8,7 +8,7 @@ async function main() {
     };
     let time = new Date();
     console.log(`Starting Rawdl in Full Delete Mode [${time.getHours()}:${time.getMinutes()} ${time.getDate()}/${time.getMonth()}]`);
-    let ap = new rawdl.rawdl.AutoPilot('/data/shows.json', 'https://subsplease.org/rss/?t&r=1080', api_keys,'/data/downloads');
+    let ap = new rawdl.AutoPilot('/data/shows.json', 'https://subsplease.org/rss/?t&r=1080', api_keys,'/data/downloads');
     await ap.full_delete();
 }
 
