@@ -2,11 +2,12 @@ version: "3"
 
 services:
   anime:
-    image: nlanson/rawdl:fd
+    image: nlanson/rawdl:debug
     environment:
       API_USERNAME: "09c8392061b548eebd4e"
       API_PASSWORD: "Z1doL1Qjm6Fq9Yd"
       API_FOLDER: "DjOleF2OpRk"
+      TZ: Australia/Sydney
     volumes:
       - "./data:/data"
     container_name: anime

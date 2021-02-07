@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "rawdl": "file:.."
+    "rawdl": "^1.1.7"
   }
 }

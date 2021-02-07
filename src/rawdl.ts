@@ -109,6 +109,10 @@ export namespace rawdl {
             }
         }
 
+        public async debug() {
+            console.log('Nothing to debug.')
+        }
+
     }
     
     export class Scan { //This class will scan for released episodes under the shows.json filter.

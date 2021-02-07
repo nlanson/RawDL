@@ -95,6 +95,7 @@ services:
       API_USERNAME: '<your streamtape api username>'
       API_PASSWORD: '<your streamtape api password>'
       API_FOLDER: '<your streamtape folder id>'
+      TZ: Australia/Sydney # Or your preferred timezone.
     volumes:
       - "./data:/data"
     container_name: rawdl
